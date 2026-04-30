@@ -2,7 +2,7 @@
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
-[Bb]uilds/
+.deploy-tmp/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 *.pidb
