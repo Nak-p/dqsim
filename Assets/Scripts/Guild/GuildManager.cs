@@ -6,9 +6,12 @@ namespace DQSim
 {
     public class GuildManager : MonoBehaviour
     {
+        private const int GuildSharePercent = 20;
+
         public List<Adventurer> Adventurers { get; } = new List<Adventurer>();
         public List<Quest> AvailableQuests  { get; } = new List<Quest>();
         public int GuildGold { get; private set; } = 1000;
+        public int TotalBountyEarned { get; private set; }
 
         public event Action OnGuildStateChanged;
 
@@ -73,7 +76,69 @@ namespace DQSim
 
         private void HandleMissionComplete(ActiveMission mission)
         {
-            GuildGold += mission.Quest.RewardGold;
+            int reward = mission.Quest.RewardGold;
+            int guildShare = reward * GuildSharePercent / 100;
+            GuildGold += guildShare;
+
+            int partyCount = mission.Party?.Count ?? 0;
+            if (partyCount > 0)
+            {
+                int adventurerPool = reward - guildShare;
+                float totalWeight = 0f;
+                foreach (var a in mission.Party)
+                    totalWeight += AdventurerRankInfo.RewardWeight(a.Rank);
+                if (totalWeight <= 0f)
+                    totalWeight = partyCount;
+
+                var payouts = new int[partyCount];
+                var fractional = new float[partyCount];
+                int distributed = 0;
+
+                for (int i = 0; i < partyCount; i++)
+                {
+                    var adv = mission.Party[i];
+                    float w = AdventurerRankInfo.RewardWeight(adv.Rank);
+                    float exact = adventurerPool * (w / totalWeight);
+                    int payout = Mathf.FloorToInt(exact);
+                    payouts[i] = payout;
+                    fractional[i] = exact - payout;
+                    distributed += payout;
+                }
+
+                int remainder = adventurerPool - distributed;
+                // 端数は「小数部が大きい + 高ランク」の順で配分し、相関を明確にする。
+                while (remainder > 0)
+                {
+                    int bestIndex = 0;
+                    float bestFrac = float.MinValue;
+                    int bestRank = int.MinValue;
+                    for (int i = 0; i < partyCount; i++)
+                    {
+                        int rankValue = (int)mission.Party[i].Rank;
+                        if (fractional[i] > bestFrac ||
+                            (Mathf.Approximately(fractional[i], bestFrac) && rankValue > bestRank))
+                        {
+                            bestFrac = fractional[i];
+                            bestRank = rankValue;
+                            bestIndex = i;
+                        }
+                    }
+
+                    payouts[bestIndex]++;
+                    fractional[bestIndex] = -1f;
+                    remainder--;
+                }
+
+                for (int i = 0; i < partyCount; i++)
+                {
+                    var adv = mission.Party[i];
+                    int payout = payouts[i];
+                    adv.EarnedGold += payout;
+                    adv.CurrentGold += payout;
+                    TotalBountyEarned += payout;
+                }
+            }
+
             foreach (var a in mission.Party) a.IsAvailable = true;
             OnGuildStateChanged?.Invoke();
         }

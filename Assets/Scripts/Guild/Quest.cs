@@ -28,11 +28,14 @@ namespace DQSim
 
         public static Quest Generate(MapData map, System.Random rng, int questIndex)
         {
-            var rank = (AdventurerRank)rng.Next(0, 3);
-            int baseReward = rank switch {
-                AdventurerRank.Copper => rng.Next(100, 350),
-                AdventurerRank.Silver => rng.Next(350, 700),
-                AdventurerRank.Gold   => rng.Next(700, 1500),
+            var rank = (AdventurerRank)rng.Next(0, 5);
+            int baseReward = rank switch
+            {
+                AdventurerRank.Copper  => rng.Next(100, 280),
+                AdventurerRank.Iron    => rng.Next(260, 480),
+                AdventurerRank.Silver  => rng.Next(450, 720),
+                AdventurerRank.Gold    => rng.Next(680, 1200),
+                AdventurerRank.Mithril => rng.Next(1100, 1800),
                 _ => 200
             };
 

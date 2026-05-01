@@ -17,8 +17,9 @@ namespace DQSim
         private RectTransform _missionContent;
         private RectTransform _rosterContent;
 
-        // Top-bar gold display
+        // Top-bar economy display
         private TextMeshProUGUI _goldLabel;
+        private TextMeshProUGUI _bountyLabel;
 
         // Cached row lists for cleanup
         private readonly List<GameObject> _questRows   = new List<GameObject>();
@@ -42,18 +43,38 @@ namespace DQSim
             // ── Top bar ──────────────────────────────────────────────────
             var topBar = UIBuilder.TopBar(transform, 44, new Color(0.05f, 0.05f, 0.25f, 1f));
 
-            // Gold label – left side
-            var goldGO       = new GameObject("GoldLabel");
-            goldGO.transform.SetParent(topBar.transform, false);
-            _goldLabel           = goldGO.AddComponent<TextMeshProUGUI>();
+            // Economy panel - left side
+            var economyGO = new GameObject("EconomyPanel");
+            economyGO.transform.SetParent(topBar.transform, false);
+            var economyRT = economyGO.AddComponent<RectTransform>();
+            economyRT.anchorMin = new Vector2(0f, 0.05f);
+            economyRT.anchorMax = new Vector2(0.28f, 0.95f);
+            economyRT.offsetMin = new Vector2(10f, 0f);
+            economyRT.offsetMax = Vector2.zero;
+
+            var goldGO = new GameObject("GoldLabel");
+            goldGO.transform.SetParent(economyGO.transform, false);
+            _goldLabel = goldGO.AddComponent<TextMeshProUGUI>();
             _goldLabel.fontSize  = 14f;
             _goldLabel.color     = new Color(1f, 0.85f, 0.3f);
             _goldLabel.alignment = TextAlignmentOptions.MidlineLeft;
-            var goldRT   = goldGO.GetComponent<RectTransform>();
-            goldRT.anchorMin = new Vector2(0f,   0.1f);
-            goldRT.anchorMax = new Vector2(0.22f, 0.9f);
-            goldRT.offsetMin = new Vector2(12, 0);
+            var goldRT = goldGO.GetComponent<RectTransform>();
+            goldRT.anchorMin = new Vector2(0f, 0.52f);
+            goldRT.anchorMax = new Vector2(1f, 1f);
+            goldRT.offsetMin = Vector2.zero;
             goldRT.offsetMax = Vector2.zero;
+
+            var bountyGO = new GameObject("BountyLabel");
+            bountyGO.transform.SetParent(economyGO.transform, false);
+            _bountyLabel = bountyGO.AddComponent<TextMeshProUGUI>();
+            _bountyLabel.fontSize = 11f;
+            _bountyLabel.color = new Color(0.70f, 0.95f, 1.0f);
+            _bountyLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            var bountyRT = bountyGO.GetComponent<RectTransform>();
+            bountyRT.anchorMin = new Vector2(0f, 0f);
+            bountyRT.anchorMax = new Vector2(1f, 0.52f);
+            bountyRT.offsetMin = Vector2.zero;
+            bountyRT.offsetMax = Vector2.zero;
 
             // Title – center
             UIBuilder.AddLabel(topBar.transform, "GUILD HALL", 20,
@@ -151,7 +172,11 @@ namespace DQSim
 
         // ─── Internal refresh ─────────────────────────────────────────────
 
-        private void UpdateGold() => _goldLabel.text = $"Gold: {_guild.GuildGold}G";
+        private void UpdateGold()
+        {
+            _goldLabel.text = $"Gold: {_guild.GuildGold}G";
+            _bountyLabel.text = $"Bounty Earned: {_guild.TotalBountyEarned}G";
+        }
 
         // ── Quest Board ───────────────────────────────────────────────────
 
@@ -228,34 +253,50 @@ namespace DQSim
             foreach (Transform child in _rosterContent) Destroy(child.gameObject);
 
             // Header
-            var h = UIBuilder.Row(_rosterContent, new Color(0.18f, 0.18f, 0.32f, 1f), 26f);
-            UIBuilder.RowCell(h.transform, "Name",    12f, Color.yellow, new Vector2(0f,    0f), new Vector2(0.25f, 1f));
-            UIBuilder.RowCell(h.transform, "Job",     12f, Color.yellow, new Vector2(0.25f, 0f), new Vector2(0.44f, 1f));
-            UIBuilder.RowCell(h.transform, "Rank",    12f, Color.yellow, new Vector2(0.44f, 0f), new Vector2(0.58f, 1f));
-            UIBuilder.RowCell(h.transform, "Status",  12f, Color.yellow, new Vector2(0.58f, 0f), new Vector2(0.78f, 1f));
-            UIBuilder.RowCell(h.transform, "Str/Vit", 10f, Color.yellow, new Vector2(0.78f, 0f), new Vector2(1f,    1f));
+            var h = UIBuilder.Row(_rosterContent, new Color(0.18f, 0.18f, 0.32f, 1f), 28f);
+            UIBuilder.RowCell(h.transform, "Name",   10f, Color.yellow, new Vector2(0f,    0f), new Vector2(0.15f, 1f));
+            UIBuilder.RowCell(h.transform, "Job",    10f, Color.yellow, new Vector2(0.15f, 0f), new Vector2(0.23f, 1f));
+            UIBuilder.RowCell(h.transform, "Rank",   10f, Color.yellow, new Vector2(0.23f, 0f), new Vector2(0.31f, 1f));
+            UIBuilder.RowCell(h.transform, "St",     10f, Color.yellow, new Vector2(0.31f, 0f), new Vector2(0.39f, 1f));
+            UIBuilder.RowCell(h.transform, "HP/MP",  10f, Color.yellow, new Vector2(0.39f, 0f), new Vector2(0.50f, 1f));
+            UIBuilder.RowCell(h.transform, "P/M/H",  10f, Color.yellow, new Vector2(0.50f, 0f), new Vector2(0.68f, 1f));
+            UIBuilder.RowCell(h.transform, "Pow",    10f, Color.yellow, new Vector2(0.68f, 0f), new Vector2(0.76f, 1f));
+            UIBuilder.RowCell(h.transform, "Earned", 10f, Color.yellow, new Vector2(0.76f, 0f), new Vector2(0.88f, 1f));
+            UIBuilder.RowCell(h.transform, "Gold",   10f, Color.yellow, new Vector2(0.88f, 0f), new Vector2(1f,    1f));
 
             foreach (var adv in _guild.Adventurers)
             {
                 var bgCol = adv.IsAvailable
                     ? new Color(0.1f, 0.15f, 0.25f, 1f)
                     : new Color(0.15f, 0.1f, 0.1f, 1f);
-                var row = UIBuilder.Row(_rosterContent, bgCol, 34f);
+                var row = UIBuilder.Row(_rosterContent, bgCol, 40f);
 
                 Color statusCol = adv.IsAvailable
                     ? new Color(0.4f, 0.9f, 0.4f)
                     : new Color(0.9f, 0.5f, 0.3f);
 
+                var st = adv.Stats;
+                string hpMp = $"HP{st.HP}\nMP{st.MP}";
+                string pmh  = $"P{st.PhysicalAttack} M{st.MagicAttack}\nH{st.HealPower}";
+
                 UIBuilder.RowCell(row.transform, adv.Name,
-                    13f, Color.white, new Vector2(0f, 0f), new Vector2(0.25f, 1f));
+                    10f, Color.white, new Vector2(0f, 0f), new Vector2(0.15f, 1f));
                 UIBuilder.RowCell(row.transform, AdventurerJobInfo.DisplayName(adv.Job),
-                    12f, Color.white, new Vector2(0.25f, 0f), new Vector2(0.44f, 1f));
+                    10f, Color.white, new Vector2(0.15f, 0f), new Vector2(0.23f, 1f));
                 UIBuilder.RowCell(row.transform, AdventurerRankInfo.DisplayName(adv.Rank),
-                    12f, AdventurerRankInfo.BadgeColor(adv.Rank), new Vector2(0.44f, 0f), new Vector2(0.58f, 1f));
+                    10f, AdventurerRankInfo.BadgeColor(adv.Rank), new Vector2(0.23f, 0f), new Vector2(0.31f, 1f));
                 UIBuilder.RowCell(row.transform, adv.StatusText,
-                    12f, statusCol, new Vector2(0.58f, 0f), new Vector2(0.78f, 1f));
-                UIBuilder.RowCell(row.transform, $"S{adv.Stats.Strength} V{adv.Stats.Vitality}",
-                    10f, Color.white, new Vector2(0.78f, 0f), new Vector2(1f, 1f));
+                    10f, statusCol, new Vector2(0.31f, 0f), new Vector2(0.39f, 1f));
+                UIBuilder.RowCell(row.transform, hpMp,
+                    9f, Color.white, new Vector2(0.39f, 0f), new Vector2(0.50f, 1f));
+                UIBuilder.RowCell(row.transform, pmh,
+                    9f, Color.white, new Vector2(0.50f, 0f), new Vector2(0.68f, 1f));
+                UIBuilder.RowCell(row.transform, st.TotalPower.ToString(),
+                    9f, new Color(1f, 0.85f, 0.45f), new Vector2(0.68f, 0f), new Vector2(0.76f, 1f));
+                UIBuilder.RowCell(row.transform, $"{adv.EarnedGold}G",
+                    9f, new Color(0.85f, 1f, 0.70f), new Vector2(0.76f, 0f), new Vector2(0.88f, 1f));
+                UIBuilder.RowCell(row.transform, $"{adv.CurrentGold}G",
+                    9f, new Color(1f, 0.92f, 0.55f), new Vector2(0.88f, 0f), new Vector2(1f, 1f));
             }
         }
 

@@ -12,6 +12,8 @@ namespace DQSim
         public AdventurerRank Rank;
         public AdventurerStats Stats;
         public bool IsAvailable = true;
+        public int EarnedGold;
+        public int CurrentGold;
 
         public string StatusText => IsAvailable ? "Available" : "On Quest";
 
@@ -24,9 +26,7 @@ namespace DQSim
         {
             var race = (AdventurerRace)rng.Next(0, 3);
             var job  = (AdventurerJob)rng.Next(0, 3);
-            var rank = rng.Next(0, 10) < 6 ? AdventurerRank.Copper
-                     : rng.Next(0, 10) < 7 ? AdventurerRank.Silver
-                     : AdventurerRank.Gold;
+            var rank = AdventurerRankInfo.PickRank(rng);
 
             string[] pool = race == AdventurerRace.Human ? HumanNames
                           : race == AdventurerRace.Elf   ? ElfNames
@@ -39,7 +39,7 @@ namespace DQSim
                 Job   = job,
                 Race  = race,
                 Rank  = rank,
-                Stats = AdventurerStats.Generate(job, race, rng),
+                Stats = AdventurerStats.GenerateForRank(job, race, rank, rng),
             };
         }
 
