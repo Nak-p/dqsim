@@ -6,6 +6,8 @@ namespace DQSim
 {
     public class GuildManager : MonoBehaviour
     {
+        private const int GuildSharePercent = 20;
+
         public List<Adventurer> Adventurers { get; } = new List<Adventurer>();
         public List<Quest> AvailableQuests  { get; } = new List<Quest>();
         public int GuildGold { get; private set; } = 1000;
@@ -73,7 +75,24 @@ namespace DQSim
 
         private void HandleMissionComplete(ActiveMission mission)
         {
-            GuildGold += mission.Quest.RewardGold;
+            int reward = mission.Quest.RewardGold;
+            int guildShare = reward * GuildSharePercent / 100;
+            GuildGold += guildShare;
+
+            int partyCount = mission.Party?.Count ?? 0;
+            if (partyCount > 0)
+            {
+                int adventurerPool = reward - guildShare;
+                int perAdventurer  = adventurerPool / partyCount;
+                int remainder      = adventurerPool % partyCount;
+
+                for (int i = 0; i < partyCount; i++)
+                {
+                    int payout = perAdventurer + (i < remainder ? 1 : 0);
+                    mission.Party[i].EarnedGold += payout;
+                }
+            }
+
             foreach (var a in mission.Party) a.IsAvailable = true;
             OnGuildStateChanged?.Invoke();
         }

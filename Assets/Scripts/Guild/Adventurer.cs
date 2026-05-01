@@ -12,6 +12,7 @@ namespace DQSim
         public AdventurerRank Rank;
         public AdventurerStats Stats;
         public bool IsAvailable = true;
+        public int EarnedGold;
 
         public string StatusText => IsAvailable ? "Available" : "On Quest";
 

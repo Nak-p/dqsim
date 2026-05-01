@@ -1,0 +1,14 @@
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-honu9" at "2026-04-30T13:19:41.0145226Z"
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.1+9fbee8e
+  Session Id:              edcec78be77949898a9b88b6ee4f318c
+  Correlation Id:          9b4ac324c036605705d552e125b248ff
+  External correlation Id: 4877254331631657974
+  Machine Id:              MDMdgNvCGVkFa2SSmdn72O0afFo=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-honu9" (connect: 0.00s, validation: 0.01s, handshake: 1.51s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-honu9-notifications" at "2026-04-30T13:19:42.5397546Z"
+[Licensing::Module] Generating manual activation license file: C:\Users\honu9\unity_project/Unity_v6000.4.4f1.alf
+[Licensing::Client] Successfully processed ALF generation request: C:\Users\honu9\unity_project\Unity_v6000.4.4f1.alf
+[Licensing::Module] Manual activation license file successfully saved.
+Exiting without the bug reporter. Application will terminate with return code 0

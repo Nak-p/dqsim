@@ -51,7 +51,16 @@ namespace DQSim
             missionManager.OnArrivalAtDestination += m =>
                 notificationPanel.Show($"Party arrived: {m.Quest.Title}  |  Returning to base...");
             missionManager.OnReturnedToBase += m =>
-                notificationPanel.Show($"Mission complete: {m.Quest.Title}  +{m.Quest.RewardGold}G");
+            {
+                int reward = m.Quest.RewardGold;
+                int guildShare = reward * 20 / 100;
+                int adventurerPool = reward - guildShare;
+                int partyCount = m.Party?.Count ?? 0;
+                int perAdventurer = partyCount > 0 ? adventurerPool / partyCount : 0;
+
+                notificationPanel.Show(
+                    $"Mission complete: {m.Quest.Title}  Guild +{guildShare}G  Adventurer +{perAdventurer}G each");
+            };
 
             // 7. Camera
             SetupCamera();
