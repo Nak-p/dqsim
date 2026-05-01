@@ -229,11 +229,12 @@ namespace DQSim
 
             // Header
             var h = UIBuilder.Row(_rosterContent, new Color(0.18f, 0.18f, 0.32f, 1f), 26f);
-            UIBuilder.RowCell(h.transform, "Name",    12f, Color.yellow, new Vector2(0f,    0f), new Vector2(0.25f, 1f));
-            UIBuilder.RowCell(h.transform, "Job",     12f, Color.yellow, new Vector2(0.25f, 0f), new Vector2(0.44f, 1f));
-            UIBuilder.RowCell(h.transform, "Rank",    12f, Color.yellow, new Vector2(0.44f, 0f), new Vector2(0.58f, 1f));
-            UIBuilder.RowCell(h.transform, "Status",  12f, Color.yellow, new Vector2(0.58f, 0f), new Vector2(0.78f, 1f));
-            UIBuilder.RowCell(h.transform, "Str/Vit", 10f, Color.yellow, new Vector2(0.78f, 0f), new Vector2(1f,    1f));
+            UIBuilder.RowCell(h.transform, "Name",    12f, Color.yellow, new Vector2(0f,    0f), new Vector2(0.23f, 1f));
+            UIBuilder.RowCell(h.transform, "Job",     12f, Color.yellow, new Vector2(0.23f, 0f), new Vector2(0.40f, 1f));
+            UIBuilder.RowCell(h.transform, "Rank",    12f, Color.yellow, new Vector2(0.40f, 0f), new Vector2(0.53f, 1f));
+            UIBuilder.RowCell(h.transform, "Status",  12f, Color.yellow, new Vector2(0.53f, 0f), new Vector2(0.70f, 1f));
+            UIBuilder.RowCell(h.transform, "Gold",    11f, Color.yellow, new Vector2(0.70f, 0f), new Vector2(0.82f, 1f));
+            UIBuilder.RowCell(h.transform, "Str/Vit", 10f, Color.yellow, new Vector2(0.82f, 0f), new Vector2(1f,    1f));
 
             foreach (var adv in _guild.Adventurers)
             {
@@ -247,15 +248,17 @@ namespace DQSim
                     : new Color(0.9f, 0.5f, 0.3f);
 
                 UIBuilder.RowCell(row.transform, adv.Name,
-                    13f, Color.white, new Vector2(0f, 0f), new Vector2(0.25f, 1f));
+                    13f, Color.white, new Vector2(0f, 0f), new Vector2(0.23f, 1f));
                 UIBuilder.RowCell(row.transform, AdventurerJobInfo.DisplayName(adv.Job),
-                    12f, Color.white, new Vector2(0.25f, 0f), new Vector2(0.44f, 1f));
+                    12f, Color.white, new Vector2(0.23f, 0f), new Vector2(0.40f, 1f));
                 UIBuilder.RowCell(row.transform, AdventurerRankInfo.DisplayName(adv.Rank),
-                    12f, AdventurerRankInfo.BadgeColor(adv.Rank), new Vector2(0.44f, 0f), new Vector2(0.58f, 1f));
+                    12f, AdventurerRankInfo.BadgeColor(adv.Rank), new Vector2(0.40f, 0f), new Vector2(0.53f, 1f));
                 UIBuilder.RowCell(row.transform, adv.StatusText,
-                    12f, statusCol, new Vector2(0.58f, 0f), new Vector2(0.78f, 1f));
+                    12f, statusCol, new Vector2(0.53f, 0f), new Vector2(0.70f, 1f));
+                UIBuilder.RowCell(row.transform, $"{adv.EarnedGold}G",
+                    11f, new Color(1f, 0.85f, 0.35f), new Vector2(0.70f, 0f), new Vector2(0.82f, 1f));
                 UIBuilder.RowCell(row.transform, $"S{adv.Stats.Strength} V{adv.Stats.Vitality}",
-                    10f, Color.white, new Vector2(0.78f, 0f), new Vector2(1f, 1f));
+                    10f, Color.white, new Vector2(0.82f, 0f), new Vector2(1f, 1f));
             }
         }
 

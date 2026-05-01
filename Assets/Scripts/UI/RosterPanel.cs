@@ -48,12 +48,13 @@ namespace DQSim
         {
             var go = UIBuilder.Row(_content, new Color(0.2f, 0.2f, 0.35f, 1f), 28f);
             go.transform.SetParent(_content, false);
-            UIBuilder.RowCell(go.transform, "Name",   13f, Color.yellow, new Vector2(0f,    0f), new Vector2(0.22f, 1f));
-            UIBuilder.RowCell(go.transform, "Job",    13f, Color.yellow, new Vector2(0.22f, 0f), new Vector2(0.38f, 1f));
-            UIBuilder.RowCell(go.transform, "Race",   13f, Color.yellow, new Vector2(0.38f, 0f), new Vector2(0.53f, 1f));
-            UIBuilder.RowCell(go.transform, "Rank",   13f, Color.yellow, new Vector2(0.53f, 0f), new Vector2(0.65f, 1f));
-            UIBuilder.RowCell(go.transform, "Status", 13f, Color.yellow, new Vector2(0.65f, 0f), new Vector2(0.80f, 1f));
-            UIBuilder.RowCell(go.transform, "Stats",  11f, Color.yellow, new Vector2(0.80f, 0f), new Vector2(1f,    1f));
+            UIBuilder.RowCell(go.transform, "Name",   13f, Color.yellow, new Vector2(0f,    0f), new Vector2(0.20f, 1f));
+            UIBuilder.RowCell(go.transform, "Job",    13f, Color.yellow, new Vector2(0.20f, 0f), new Vector2(0.34f, 1f));
+            UIBuilder.RowCell(go.transform, "Race",   13f, Color.yellow, new Vector2(0.34f, 0f), new Vector2(0.46f, 1f));
+            UIBuilder.RowCell(go.transform, "Rank",   13f, Color.yellow, new Vector2(0.46f, 0f), new Vector2(0.56f, 1f));
+            UIBuilder.RowCell(go.transform, "Status", 13f, Color.yellow, new Vector2(0.56f, 0f), new Vector2(0.70f, 1f));
+            UIBuilder.RowCell(go.transform, "Gold",   12f, Color.yellow, new Vector2(0.70f, 0f), new Vector2(0.82f, 1f));
+            UIBuilder.RowCell(go.transform, "Stats",  11f, Color.yellow, new Vector2(0.82f, 0f), new Vector2(1f,    1f));
         }
 
         private void AddAdventurerRow(Adventurer adv)
@@ -69,12 +70,13 @@ namespace DQSim
                 ? new Color(0.4f, 0.9f, 0.4f)
                 : new Color(0.9f, 0.5f, 0.3f);
 
-            UIBuilder.RowCell(go.transform, adv.Name,                                                        13f, Color.white,  new Vector2(0f,    0f), new Vector2(0.22f, 1f));
-            UIBuilder.RowCell(go.transform, AdventurerJobInfo.DisplayName(adv.Job),                           12f, Color.white,  new Vector2(0.22f, 0f), new Vector2(0.38f, 1f));
-            UIBuilder.RowCell(go.transform, AdventurerRaceInfo.DisplayName(adv.Race),                         12f, Color.white,  new Vector2(0.38f, 0f), new Vector2(0.53f, 1f));
-            UIBuilder.RowCell(go.transform, AdventurerRankInfo.DisplayName(adv.Rank),                         12f, rankColor,    new Vector2(0.53f, 0f), new Vector2(0.65f, 1f));
-            UIBuilder.RowCell(go.transform, adv.StatusText,                                                   12f, statusColor,  new Vector2(0.65f, 0f), new Vector2(0.80f, 1f));
-            UIBuilder.RowCell(go.transform, $"S{adv.Stats.Strength} V{adv.Stats.Vitality} M{adv.Stats.Magic}", 11f, Color.white, new Vector2(0.80f, 0f), new Vector2(1f,    1f));
+            UIBuilder.RowCell(go.transform, adv.Name,                                                        13f, Color.white,  new Vector2(0f,    0f), new Vector2(0.20f, 1f));
+            UIBuilder.RowCell(go.transform, AdventurerJobInfo.DisplayName(adv.Job),                           12f, Color.white,  new Vector2(0.20f, 0f), new Vector2(0.34f, 1f));
+            UIBuilder.RowCell(go.transform, AdventurerRaceInfo.DisplayName(adv.Race),                         12f, Color.white,  new Vector2(0.34f, 0f), new Vector2(0.46f, 1f));
+            UIBuilder.RowCell(go.transform, AdventurerRankInfo.DisplayName(adv.Rank),                         12f, rankColor,    new Vector2(0.46f, 0f), new Vector2(0.56f, 1f));
+            UIBuilder.RowCell(go.transform, adv.StatusText,                                                   12f, statusColor,  new Vector2(0.56f, 0f), new Vector2(0.70f, 1f));
+            UIBuilder.RowCell(go.transform, $"{adv.EarnedGold}G",                                             11f, new Color(1f, 0.85f, 0.35f), new Vector2(0.70f, 0f), new Vector2(0.82f, 1f));
+            UIBuilder.RowCell(go.transform, $"S{adv.Stats.Strength} V{adv.Stats.Vitality} M{adv.Stats.Magic}", 11f, Color.white, new Vector2(0.82f, 0f), new Vector2(1f,    1f));
         }
     }
 }
