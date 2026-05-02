@@ -59,6 +59,10 @@ namespace DQSim
 
         private void SetupCamera()
         {
+            // BattleField 等のシーンでこのオブジェクトを Awake 中に無効化している場合、
+            // ワールド用カメラ位置を上書きしない（バトル用カメラを壊す原因になる）。
+            if (!gameObject.activeInHierarchy) return;
+
             var cam = Camera.main;
             if (cam == null) return;
             cam.orthographic       = true;
