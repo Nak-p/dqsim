@@ -1,0 +1,14 @@
+{
+  "width": 64,
+  "height": 40,
+  "elevation_scale": 0.05,
+  "moisture_scale": 0.08,
+  "water_threshold": 0.35,
+  "forest_elevation_max": 0.50,
+  "forest_moisture_min": 0.55,
+  "mountain_threshold": 0.75,
+  "desert_elevation_max": 0.55,
+  "desert_moisture_max": 0.30,
+  "min_base_dest_distance": 20,
+  "path_retry_count": 10
+}

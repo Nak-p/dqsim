@@ -25,13 +25,15 @@ namespace AgentSim.Config
         public static SettingsRegistry Current { get; private set; }
 
         // ── 設定プロパティ ──────────────────────────────────────────────
-        public GameConfig             Game      { get; private set; }
-        public StatDefinitions        Stats     { get; private set; }
-        public TierConfig             Tiers     { get; private set; }
-        public RoleConfig             Roles     { get; private set; }
-        public OriginConfig           Origins   { get; private set; }
-        public ContractTemplateConfig Contracts { get; private set; }
-        public ActionConfig           Actions   { get; private set; }
+        public GameConfig             Game        { get; private set; }
+        public StatDefinitions        Stats       { get; private set; }
+        public TierConfig             Tiers       { get; private set; }
+        public RoleConfig             Roles       { get; private set; }
+        public OriginConfig           Origins     { get; private set; }
+        public ContractTemplateConfig Contracts   { get; private set; }
+        public ActionConfig           Actions     { get; private set; }
+        public TileTypeConfig         TileTypes   { get; private set; }
+        public MapConfig              MapSettings { get; private set; }
 
         // ── ロード ──────────────────────────────────────────────────────
         /// <summary>
@@ -42,13 +44,15 @@ namespace AgentSim.Config
             var r = new SettingsRegistry();
             string root = Path.Combine(Application.streamingAssetsPath, "settings", settingId);
 
-            r.Game      = LoadJson<GameConfig>            (root, "game_config");
-            r.Stats     = LoadJson<StatDefinitions>       (root, "stat_definitions");
-            r.Tiers     = LoadJson<TierConfig>            (root, "tiers");
-            r.Roles     = LoadJson<RoleConfig>            (root, "roles");
-            r.Origins   = LoadJson<OriginConfig>          (root, "origins");
-            r.Contracts = LoadJson<ContractTemplateConfig>(root, "contract_templates");
-            r.Actions   = LoadJson<ActionConfig>          (root, "actions");
+            r.Game        = LoadJson<GameConfig>            (root, "game_config");
+            r.Stats       = LoadJson<StatDefinitions>       (root, "stat_definitions");
+            r.Tiers       = LoadJson<TierConfig>            (root, "tiers");
+            r.Roles       = LoadJson<RoleConfig>            (root, "roles");
+            r.Origins     = LoadJson<OriginConfig>          (root, "origins");
+            r.Contracts   = LoadJson<ContractTemplateConfig>(root, "contract_templates");
+            r.Actions     = LoadJson<ActionConfig>          (root, "actions");
+            r.TileTypes   = LoadJson<TileTypeConfig>        (root, "tile_types");
+            r.MapSettings = LoadJson<MapConfig>             (root, "map_config");
 
             // 配列長の整合性チェック
             r.ValidateArrayLengths();

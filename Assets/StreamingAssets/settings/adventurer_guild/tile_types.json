@@ -1,0 +1,72 @@
+{
+  "tile_types": [
+    {
+      "id": "grass",
+      "display_name": "Grassland",
+      "generator_role": "base",
+      "walkable": true,
+      "movement_cost": 1.0,
+      "base_color": [0.353, 0.541, 0.235, 1.0],
+      "pattern": "flat"
+    },
+    {
+      "id": "water",
+      "display_name": "Water",
+      "generator_role": "water",
+      "walkable": false,
+      "movement_cost": 999.0,
+      "base_color": [0.145, 0.388, 0.659, 1.0],
+      "secondary_color": [0.290, 0.565, 0.851, 1.0],
+      "pattern": "checkerboard"
+    },
+    {
+      "id": "forest",
+      "display_name": "Forest",
+      "generator_role": "forest",
+      "walkable": true,
+      "movement_cost": 1.5,
+      "base_color": [0.176, 0.369, 0.118, 1.0],
+      "secondary_color": [0.102, 0.239, 0.059, 1.0],
+      "pattern": "dotted"
+    },
+    {
+      "id": "mountain",
+      "display_name": "Mountain",
+      "generator_role": "mountain",
+      "walkable": true,
+      "movement_cost": 3.0,
+      "base_color": [0.549, 0.478, 0.420, 1.0],
+      "secondary_color": [0.800, 0.733, 0.667, 1.0],
+      "pattern": "mountain"
+    },
+    {
+      "id": "desert",
+      "display_name": "Desert",
+      "generator_role": "desert",
+      "walkable": true,
+      "movement_cost": 2.0,
+      "base_color": [0.831, 0.667, 0.439, 1.0],
+      "pattern": "flat"
+    },
+    {
+      "id": "marker_base",
+      "display_name": "Guild Hall",
+      "generator_role": "marker_base",
+      "walkable": true,
+      "movement_cost": 1.0,
+      "base_color": [1.0, 1.0, 1.0, 1.0],
+      "secondary_color": [0.800, 0.133, 0.133, 1.0],
+      "pattern": "marker_base"
+    },
+    {
+      "id": "marker_dest",
+      "display_name": "Quest Site",
+      "generator_role": "marker_dest",
+      "walkable": true,
+      "movement_cost": 1.0,
+      "base_color": [0.133, 0.133, 0.533, 1.0],
+      "secondary_color": [1.0, 0.867, 0.0, 1.0],
+      "pattern": "marker_dest"
+    }
+  ]
+}

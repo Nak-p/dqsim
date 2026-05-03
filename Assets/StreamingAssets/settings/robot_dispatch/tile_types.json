@@ -1,0 +1,74 @@
+{
+  "tile_types": [
+    {
+      "id": "circuit_floor",
+      "display_name": "Circuit Floor",
+      "generator_role": "base",
+      "walkable": true,
+      "movement_cost": 1.0,
+      "base_color": [0.157, 0.196, 0.173, 1.0],
+      "secondary_color": [0.098, 0.392, 0.196, 1.0],
+      "pattern": "dotted"
+    },
+    {
+      "id": "coolant_pool",
+      "display_name": "Coolant Pool",
+      "generator_role": "water",
+      "walkable": false,
+      "movement_cost": 999.0,
+      "base_color": [0.039, 0.518, 0.741, 1.0],
+      "secondary_color": [0.529, 0.882, 0.961, 1.0],
+      "pattern": "checkerboard"
+    },
+    {
+      "id": "server_cluster",
+      "display_name": "Server Cluster",
+      "generator_role": "forest",
+      "walkable": true,
+      "movement_cost": 1.5,
+      "base_color": [0.059, 0.118, 0.290, 1.0],
+      "secondary_color": [0.118, 0.235, 0.490, 1.0],
+      "pattern": "dotted"
+    },
+    {
+      "id": "reinforced_wall",
+      "display_name": "Reinforced Wall",
+      "generator_role": "mountain",
+      "walkable": true,
+      "movement_cost": 3.0,
+      "base_color": [0.298, 0.298, 0.318, 1.0],
+      "secondary_color": [0.549, 0.549, 0.569, 1.0],
+      "pattern": "mountain"
+    },
+    {
+      "id": "heat_zone",
+      "display_name": "Heat Zone",
+      "generator_role": "desert",
+      "walkable": true,
+      "movement_cost": 2.0,
+      "base_color": [0.800, 0.353, 0.098, 1.0],
+      "secondary_color": [1.0, 0.549, 0.196, 1.0],
+      "pattern": "checkerboard"
+    },
+    {
+      "id": "marker_base",
+      "display_name": "Operations Center",
+      "generator_role": "marker_base",
+      "walkable": true,
+      "movement_cost": 1.0,
+      "base_color": [0.196, 0.196, 0.196, 1.0],
+      "secondary_color": [0.0, 0.902, 0.463, 1.0],
+      "pattern": "marker_base"
+    },
+    {
+      "id": "marker_dest",
+      "display_name": "Job Site",
+      "generator_role": "marker_dest",
+      "walkable": true,
+      "movement_cost": 1.0,
+      "base_color": [0.118, 0.118, 0.118, 1.0],
+      "secondary_color": [1.0, 0.667, 0.0, 1.0],
+      "pattern": "marker_dest"
+    }
+  ]
+}

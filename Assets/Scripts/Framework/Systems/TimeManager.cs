@@ -25,6 +25,9 @@ namespace AgentSim.Systems
         // ── プロパティ ────────────────────────────────────────────────
         public GameTime CurrentTime => new GameTime(_accumulatedSeconds);
 
+        /// <summary>ゲーム内 1日が現実の何秒に相当するか（PartyController などで参照）</summary>
+        public float RealSecondsPerGameDay => realSecondsPerGameDay;
+
         // ── イベント ──────────────────────────────────────────────────
         public event Action<GameTime> OnTimeChanged;
 

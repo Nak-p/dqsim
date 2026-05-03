@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using AgentSim.Core;
+using AgentSim.Party;
 
 namespace AgentSim.Core
 {
@@ -22,8 +23,11 @@ namespace AgentSim.Core
         public string Id { get; } = Guid.NewGuid().ToString();
 
         // ── 内容 ──────────────────────────────────────────────────────
-        public Contract      Contract;
-        public List<Agent>   Party;
+        public Contract          Contract;
+        public List<Agent>       Party;
+
+        // ── ビジュアル（DispatchManager が設定） ─────────────────────
+        public PartyController   PartyController;
 
         // ── 状態 ──────────────────────────────────────────────────────
         public MissionState  State = MissionState.TravelingOut;
