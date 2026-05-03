@@ -1,0 +1,64 @@
+{
+  "tiers": [
+    {
+      "id": "copper",
+      "display_name": "Copper",
+      "index": 0,
+      "badge_color": [0.72, 0.45, 0.20, 1.0],
+      "power_mean": 30.0,
+      "power_stddev": 8.0,
+      "population_weight": 0.40,
+      "reward_weight": 1.00,
+      "contract_reward_min": 100,
+      "contract_reward_max": 280
+    },
+    {
+      "id": "iron",
+      "display_name": "Iron",
+      "index": 1,
+      "badge_color": [0.36, 0.35, 0.34, 1.0],
+      "power_mean": 55.0,
+      "power_stddev": 9.0,
+      "population_weight": 0.28,
+      "reward_weight": 1.60,
+      "contract_reward_min": 260,
+      "contract_reward_max": 480
+    },
+    {
+      "id": "silver",
+      "display_name": "Silver",
+      "index": 2,
+      "badge_color": [0.75, 0.75, 0.80, 1.0],
+      "power_mean": 80.0,
+      "power_stddev": 10.0,
+      "population_weight": 0.18,
+      "reward_weight": 2.40,
+      "contract_reward_min": 450,
+      "contract_reward_max": 720
+    },
+    {
+      "id": "gold",
+      "display_name": "Gold",
+      "index": 3,
+      "badge_color": [0.95, 0.80, 0.10, 1.0],
+      "power_mean": 110.0,
+      "power_stddev": 11.0,
+      "population_weight": 0.10,
+      "reward_weight": 3.60,
+      "contract_reward_min": 680,
+      "contract_reward_max": 1200
+    },
+    {
+      "id": "mithril",
+      "display_name": "Mithril",
+      "index": 4,
+      "badge_color": [0.78, 0.91, 1.00, 1.0],
+      "power_mean": 150.0,
+      "power_stddev": 13.0,
+      "population_weight": 0.04,
+      "reward_weight": 5.40,
+      "contract_reward_min": 1100,
+      "contract_reward_max": 1800
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "primary_stats": [
+    { "id": "strength",  "display_name": "STR", "description": "Physical power" },
+    { "id": "vitality",  "display_name": "VIT", "description": "Endurance and durability" },
+    { "id": "technique", "display_name": "MAG", "description": "Technical/magical skill" },
+    { "id": "insight",   "display_name": "WIS", "description": "Strategic acumen" },
+    { "id": "spirit",    "display_name": "FAI", "description": "Resolve and morale" }
+  ],
+  "derived_stats": [
+    {
+      "id": "endurance",
+      "display_name": "HP",
+      "formula": "20 + vitality * 5"
+    },
+    {
+      "id": "focus",
+      "display_name": "MP",
+      "formula": "10 + insight * 4"
+    },
+    {
+      "id": "melee_power",
+      "display_name": "P.Atk",
+      "formula": "5 + strength * 2"
+    },
+    {
+      "id": "ranged_power",
+      "display_name": "R.Atk",
+      "formula": "technique * 2 + insight / 2"
+    },
+    {
+      "id": "support_power",
+      "display_name": "Supp",
+      "formula": "spirit * 2 + insight / 2"
+    }
+  ],
+  "total_power_formula": "endurance / 5 + focus / 5 + melee_power + ranged_power + support_power"
+}

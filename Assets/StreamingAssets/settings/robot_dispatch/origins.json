@@ -1,0 +1,22 @@
+{
+  "origins": [
+    {
+      "id": "standard_frame",
+      "display_name": "Standard Frame",
+      "stat_bonuses": [0, 0, 0, 0, 0],
+      "name_pool": ["Unit-7","Unit-12","Unit-4","Unit-9","Unit-3","Unit-11","Unit-6","Unit-2","Unit-15","Unit-8"]
+    },
+    {
+      "id": "light_frame",
+      "display_name": "Light Frame",
+      "stat_bonuses": [-2, -1, 3, 3, -1],
+      "name_pool": ["Scout-A","Scout-B","Scout-C","Swift-1","Swift-2","Recon-X","Recon-Y","Recon-Z","Dart-1","Nimble-3"]
+    },
+    {
+      "id": "heavy_frame",
+      "display_name": "Heavy Frame",
+      "stat_bonuses": [3, 3, -2, -1, 2],
+      "name_pool": ["Tank-1","Tank-2","Brute-A","Brute-B","Armour-1","Armour-2","Iron-X","Iron-Y","Bulwark-1","Fortress-2"]
+    }
+  ]
+}

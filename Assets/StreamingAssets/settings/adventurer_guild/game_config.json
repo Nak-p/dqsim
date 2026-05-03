@@ -1,0 +1,21 @@
+{
+  "setting_id": "adventurer_guild",
+  "organization_name": "Guild",
+  "organization_label": "Guild Hall",
+  "agent_term": "Adventurer",
+  "agents_term": "Adventurers",
+  "contract_term": "Quest",
+  "contracts_term": "Quests",
+  "currency_name": "Gold",
+  "currency_symbol": "G",
+  "dispatch_term": "Dispatch",
+  "headquarters_term": "Guild Hall",
+  "initial_currency": 1000,
+  "org_share_percent": 20,
+  "roster_size": 10,
+  "initial_contracts": 4,
+  "max_available_contracts": 6,
+  "contract_gen_interval_days": 3.0,
+  "max_party_size": 4,
+  "agent_travel_speed": 2.0
+}

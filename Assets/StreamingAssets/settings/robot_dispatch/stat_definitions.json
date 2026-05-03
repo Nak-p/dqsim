@@ -1,0 +1,37 @@
+{
+  "primary_stats": [
+    { "id": "strength",  "display_name": "STR", "description": "Actuator output" },
+    { "id": "vitality",  "display_name": "DUR", "description": "Hull integrity" },
+    { "id": "technique", "display_name": "PRO", "description": "Processing speed" },
+    { "id": "insight",   "display_name": "SEN", "description": "Sensor array rating" },
+    { "id": "spirit",    "display_name": "PWR", "description": "Energy reserves" }
+  ],
+  "derived_stats": [
+    {
+      "id": "endurance",
+      "display_name": "Hull",
+      "formula": "20 + vitality * 5"
+    },
+    {
+      "id": "focus",
+      "display_name": "Energy",
+      "formula": "10 + insight * 4"
+    },
+    {
+      "id": "melee_power",
+      "display_name": "Phys",
+      "formula": "5 + strength * 2"
+    },
+    {
+      "id": "ranged_power",
+      "display_name": "Proj",
+      "formula": "technique * 2 + insight / 2"
+    },
+    {
+      "id": "support_power",
+      "display_name": "Util",
+      "formula": "spirit * 2 + insight / 2"
+    }
+  ],
+  "total_power_formula": "endurance / 5 + focus / 5 + melee_power + ranged_power + support_power"
+}

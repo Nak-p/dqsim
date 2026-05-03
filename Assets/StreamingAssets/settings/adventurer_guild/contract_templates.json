@@ -1,0 +1,34 @@
+{
+  "title_pool": [
+    "Goblin Extermination",
+    "Wolf Pack Hunt",
+    "Bandit Suppression",
+    "Ancient Ruins Exploration",
+    "Orc Raid Repulsion",
+    "Cursed Forest Investigation",
+    "Dragon Sighting Report",
+    "Missing Merchant Escort",
+    "Undead Purge",
+    "Troll Culling",
+    "Smuggler Bust",
+    "Lost Relic Recovery"
+  ],
+  "location_pool": [
+    "Eastern Forest",
+    "Northern Mountains",
+    "Southern Desert",
+    "Western Coast",
+    "Ancient Ruins",
+    "Demon's Peak",
+    "Haunted Valley",
+    "Iron Mine",
+    "Sunken Temple",
+    "Frozen Pass",
+    "Dark Swamp",
+    "Crumbling Keep"
+  ],
+  "description_template": "Contract at {location}. Fulfill the requirements and secure the area.",
+  "min_party_size": 1,
+  "max_party_size": 4,
+  "min_quest_distance": 15
+}

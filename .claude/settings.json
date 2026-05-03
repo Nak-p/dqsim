@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -Command \"$f = $env:CLAUDE_TOOL_INPUT_FILE_PATH; if ($f -notmatch '\\.cs$') { exit 0 }; $c = Get-Content $f -Raw -ErrorAction SilentlyContinue; if (-not $c) { exit 0 }; $warn = @(); if ($c -match '(?i)\\benum\\s+(JobType|RaceType|RankType|Job|Race|Rank)\\b') { $warn += '[HardcodeCheck ERROR] ゲーム固有 enum を検知しました。Job/Race/Rank は JSON の RoleDef/OriginDef/TierDef で定義してください。C# に enum を書かないこと。' }; if ($c -match '\"(Gold|HP|MP|Warrior|Priest|Mage|Human|Elf|Dwarf|Copper|Iron|Silver|Mithril)\"') { $warn += '[HardcodeCheck ERROR] 世界観固有の文字列リテラルを検知しました。SettingsRegistry.Current の display_name を使用してください。' }; if ($c -match 'const\\s+\\w+\\s+\\w*(Gold|Share|Reward|Speed|Quest|Guild|Party)\\w*\\s*=') { $warn += '[HardcodeCheck WARNING] ゲームパラメータの定数を検知しました。StreamingAssets/settings/ の JSON から読み込んでください。' }; if ($c -match '\\b(PhysicalAttack|MagicAttack|HealPower|swordAttack|magicAttack|healSpell)\\b') { $warn += '[HardcodeCheck WARNING] テーマ依存のステータス名を検知しました。melee_power / ranged_power / support_power を使用してください。' }; if ($c -match '\\b(GuildGold|GuildShare|guildGold)\\b') { $warn += '[HardcodeCheck WARNING] ギルド固有フィールド名を検知しました。OrgCurrency / orgShare など汎用名にしてください。' }; if ($warn.Count -gt 0) { Write-Host ''; Write-Host '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'; Write-Host '  AgentSim ハードコーディング検知'; Write-Host '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'; $warn | ForEach-Object { Write-Host $_ }; Write-Host ''; Write-Host '詳細は CLAUDE.md の「禁止事項」を参照してください。'; Write-Host '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'; exit 1 }; exit 0\""
+          }
+        ]
+      }
+    ]
+  }
+}

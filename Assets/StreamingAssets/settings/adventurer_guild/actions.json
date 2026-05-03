@@ -1,0 +1,28 @@
+{
+  "actions": [
+    {
+      "id": "melee_attack",
+      "display_name": "Attack",
+      "category": "melee",
+      "primary_stat": "melee_power",
+      "cost": 2.0,
+      "range": 1
+    },
+    {
+      "id": "ranged_attack",
+      "display_name": "Cast",
+      "category": "ranged",
+      "primary_stat": "ranged_power",
+      "cost": 3.0,
+      "range": 3
+    },
+    {
+      "id": "support_action",
+      "display_name": "Heal",
+      "category": "support",
+      "primary_stat": "support_power",
+      "cost": 3.0,
+      "range": 2
+    }
+  ]
+}

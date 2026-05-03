@@ -1,0 +1,34 @@
+{
+  "title_pool": [
+    "Facility Sweep",
+    "Hostile Drone Interdiction",
+    "Cargo Escort Protocol",
+    "Sensor Array Repair",
+    "Perimeter Defence Contract",
+    "Data Retrieval Op",
+    "Industrial Salvage",
+    "Anomaly Investigation",
+    "Zone Clearance",
+    "Emergency Response",
+    "Power Grid Restoration",
+    "Infrastructure Reclaim"
+  ],
+  "location_pool": [
+    "Sector 7 Industrial",
+    "Northern Array Station",
+    "Southern Outpost Delta",
+    "Coastal Platform Beta",
+    "Old Factory Complex",
+    "Signal Peak Relay",
+    "Flooded Zone C",
+    "Deep Mine Alpha",
+    "Submerged Depot",
+    "Frozen Waystation",
+    "Collapsed Tunnel 9",
+    "Quarantine Block E"
+  ],
+  "description_template": "Job at {location}. Complete all objectives and return to base.",
+  "min_party_size": 1,
+  "max_party_size": 3,
+  "min_quest_distance": 15
+}

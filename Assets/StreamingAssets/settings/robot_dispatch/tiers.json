@@ -1,0 +1,64 @@
+{
+  "tiers": [
+    {
+      "id": "mark_i",
+      "display_name": "Mark I",
+      "index": 0,
+      "badge_color": [0.45, 0.45, 0.50, 1.0],
+      "power_mean": 30.0,
+      "power_stddev": 8.0,
+      "population_weight": 0.40,
+      "reward_weight": 1.00,
+      "contract_reward_min": 500,
+      "contract_reward_max": 1400
+    },
+    {
+      "id": "mark_ii",
+      "display_name": "Mark II",
+      "index": 1,
+      "badge_color": [0.20, 0.70, 0.90, 1.0],
+      "power_mean": 55.0,
+      "power_stddev": 9.0,
+      "population_weight": 0.28,
+      "reward_weight": 1.60,
+      "contract_reward_min": 1300,
+      "contract_reward_max": 2400
+    },
+    {
+      "id": "mark_iii",
+      "display_name": "Mark III",
+      "index": 2,
+      "badge_color": [0.10, 0.90, 0.60, 1.0],
+      "power_mean": 80.0,
+      "power_stddev": 10.0,
+      "population_weight": 0.18,
+      "reward_weight": 2.40,
+      "contract_reward_min": 2250,
+      "contract_reward_max": 3600
+    },
+    {
+      "id": "mark_iv",
+      "display_name": "Mark IV",
+      "index": 3,
+      "badge_color": [0.95, 0.70, 0.10, 1.0],
+      "power_mean": 110.0,
+      "power_stddev": 11.0,
+      "population_weight": 0.10,
+      "reward_weight": 3.60,
+      "contract_reward_min": 3400,
+      "contract_reward_max": 6000
+    },
+    {
+      "id": "apex",
+      "display_name": "Apex",
+      "index": 4,
+      "badge_color": [0.95, 0.30, 0.30, 1.0],
+      "power_mean": 150.0,
+      "power_stddev": 13.0,
+      "population_weight": 0.04,
+      "reward_weight": 5.40,
+      "contract_reward_min": 5500,
+      "contract_reward_max": 9000
+    }
+  ]
+}
