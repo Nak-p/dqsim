@@ -123,7 +123,10 @@ namespace AgentSim.Editor
                 {
                     for (int i = 0; i < lines.Length; i++)
                     {
-                        if (!pattern.IsMatch(lines[i])) continue;
+                        // コメント部分（// 以降）を除いたコードだけをチェックする
+                        // 例: public string x; // "Gold" ← コメントは無視
+                        string codePart = StripLineComment(lines[i]);
+                        if (!pattern.IsMatch(codePart)) continue;
 
                         string location = $"{relPath}:{i + 1}";
                         string entry    = $"  {location}\n  → {message}";
@@ -155,6 +158,26 @@ namespace AgentSim.Editor
                     $"(対象: {allFiles.Length} ファイル)\n" +
                     "詳細は上記のログおよび CLAUDE.md を参照してください。");
             }
+        }
+
+        // ── 内部ユーティリティ ────────────────────────────────────────
+        /// <summary>
+        /// 行コメント（// 以降）を除いたコード部分だけを返す。
+        /// 文字列リテラル内の // は誤検知を避けるため簡易的に無視する
+        /// （完全な C# パーサーではないが、実用上十分）。
+        /// </summary>
+        private static string StripLineComment(string line)
+        {
+            bool inString = false;
+            for (int i = 0; i < line.Length - 1; i++)
+            {
+                char c = line[i];
+                if (c == '"' && (i == 0 || line[i - 1] != '\\'))
+                    inString = !inString;
+                if (!inString && c == '/' && line[i + 1] == '/')
+                    return line.Substring(0, i);
+            }
+            return line;
         }
 
         // ── ルールのリストを表示するデバッグメニュー ─────────────────
