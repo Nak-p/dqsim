@@ -40,7 +40,7 @@ namespace AgentSim.Core
         /// </summary>
         /// <param name="destination">マップ上のランダムなタイル座標</param>
         /// <param name="tierIndex">要求ティアの index（0 〜 tiers.Length-1）</param>
-        public static Contract Generate(Vector2Int destination, int tierIndex, Random rng)
+        public static Contract Generate(Vector2Int destination, int tierIndex, System.Random rng)
         {
             var reg  = SettingsRegistry.Current;
             var tmpl = reg.Contracts;

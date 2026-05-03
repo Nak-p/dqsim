@@ -50,7 +50,7 @@ namespace AgentSim.Core
         /// <summary>
         /// SettingsRegistry の設定に基づいてランダムなエージェントを生成する。
         /// </summary>
-        public static Agent Generate(Random rng)
+        public static Agent Generate(System.Random rng)
         {
             var reg = SettingsRegistry.Current;
 

@@ -58,7 +58,7 @@ namespace AgentSim.Core
         /// <summary>
         /// ロール・オリジン・ティアに基づいてランダムなステータスを生成する。
         /// </summary>
-        public static AgentStats Generate(RoleDef role, OriginDef origin, TierDef tier, Random rng)
+        public static AgentStats Generate(RoleDef role, OriginDef origin, TierDef tier, System.Random rng)
         {
             var defs = SettingsRegistry.Current.Stats;
             int statCount = defs.primary_stats.Length;
@@ -93,7 +93,7 @@ namespace AgentSim.Core
         }
 
         // ── 内部ユーティリティ ────────────────────────────────────────
-        private static float SampleGaussian(Random rng, float mean, float stddev)
+        private static float SampleGaussian(System.Random rng, float mean, float stddev)
         {
             // Box-Muller 変換
             double u1 = 1.0 - rng.NextDouble();
