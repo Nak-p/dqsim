@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using AgentSim.Core;
 
 namespace AgentSim.Core
 {
@@ -28,9 +29,8 @@ namespace AgentSim.Core
         public MissionState  State = MissionState.TravelingOut;
 
         // ── ETA（ゲーム内時刻） ───────────────────────────────────────
-        // GameTime 型はまだ未定義なので float (totalSeconds) で保持
-        public float EtaArrive;   // 目的地到着予定時刻（game seconds）
-        public float EtaReturn;   // 帰還予定時刻（game seconds）
+        public GameTime EtaArrive;   // 目的地到着予定時刻
+        public GameTime EtaReturn;   // 帰還予定時刻
 
         // ── 表示テキスト ──────────────────────────────────────────────
         public string StatusText
@@ -47,7 +47,7 @@ namespace AgentSim.Core
             }
         }
 
-        public float CurrentEta =>
+        public GameTime CurrentEta =>
             State == MissionState.TravelingOut ? EtaArrive : EtaReturn;
     }
 }
