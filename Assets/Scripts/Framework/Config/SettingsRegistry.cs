@@ -1,4 +1,4 @@
-// Assets/Scripts/Framework/Config/SettingsRegistry.cs
+﻿// Assets/Scripts/Framework/Config/SettingsRegistry.cs
 // AgentSim — JSON 設定の一元ロードと参照口
 //
 // 使い方:
@@ -25,15 +25,16 @@ namespace AgentSim.Config
         public static SettingsRegistry Current { get; private set; }
 
         // ── 設定プロパティ ──────────────────────────────────────────────
-        public GameConfig             Game        { get; private set; }
-        public StatDefinitions        Stats       { get; private set; }
-        public TierConfig             Tiers       { get; private set; }
-        public RoleConfig             Roles       { get; private set; }
-        public OriginConfig           Origins     { get; private set; }
-        public ContractTemplateConfig Contracts   { get; private set; }
-        public ActionConfig           Actions     { get; private set; }
-        public TileTypeConfig         TileTypes   { get; private set; }
-        public MapConfig              MapSettings { get; private set; }
+        public GameConfig             Game         { get; private set; }
+        public StatDefinitions        Stats        { get; private set; }
+        public TierConfig             Tiers        { get; private set; }
+        public RoleConfig             Roles        { get; private set; }
+        public OriginConfig           Origins      { get; private set; }
+        public ContractTemplateConfig Contracts    { get; private set; }
+        public ActionConfig           Actions      { get; private set; }
+        public TileTypeConfig         TileTypes    { get; private set; }
+        public MapConfig              MapSettings  { get; private set; }
+        public BattleVisualConfig     BattleVisual { get; private set; }
 
         // ── ロード ──────────────────────────────────────────────────────
         /// <summary>
@@ -53,6 +54,11 @@ namespace AgentSim.Config
             r.Actions     = LoadJson<ActionConfig>          (root, "actions");
             r.TileTypes   = LoadJson<TileTypeConfig>        (root, "tile_types");
             r.MapSettings = LoadJson<MapConfig>             (root, "map_config");
+
+            // オプション: battle_visual.json が存在する場合のみ読み込む
+            string bvPath = Path.Combine(root, "battle_visual.json");
+            if (File.Exists(bvPath))
+                r.BattleVisual = LoadJson<BattleVisualConfig>(root, "battle_visual");
 
             // 配列長の整合性チェック
             r.ValidateArrayLengths();
@@ -153,6 +159,15 @@ namespace AgentSim.Config
                 if (roll <= cum) return t;
             }
             return Tiers.tiers[0];
+        }
+
+        /// <summary>id に一致する BattleTileDef を返す（なければ null）</summary>
+        public BattleTileDef GetBattleTile(string id)
+        {
+            if (BattleVisual?.battle_tiles == null) return null;
+            foreach (var t in BattleVisual.battle_tiles)
+                if (t.id == id) return t;
+            return null;
         }
     }
 }

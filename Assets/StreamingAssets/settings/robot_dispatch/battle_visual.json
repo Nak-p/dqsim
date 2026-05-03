@@ -1,0 +1,9 @@
+﻿{
+  "battle_tiles": [
+    { "id": "floor",        "display_name": "Arena",        "color": [0.12, 0.16, 0.22, 1.0] },
+    { "id": "player_spawn", "display_name": "Deploy Zone",  "color": [0.10, 0.28, 0.38, 1.0] },
+    { "id": "enemy_spawn",  "display_name": "Hostile Zone", "color": [0.35, 0.12, 0.10, 1.0] }
+  ],
+  "player_unit_color": [0.20, 0.75, 0.95, 1.0],
+  "enemy_unit_color":  [0.95, 0.35, 0.20, 1.0]
+}

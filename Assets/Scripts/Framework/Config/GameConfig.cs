@@ -1,4 +1,4 @@
-// Assets/Scripts/Framework/Config/GameConfig.cs
+﻿// Assets/Scripts/Framework/Config/GameConfig.cs
 // AgentSim — 組織・通貨・用語など、世界観のトップレベル設定
 
 namespace AgentSim.Config
@@ -38,5 +38,12 @@ namespace AgentSim.Config
         public float  contract_gen_interval_days; // 案件追加間隔（ゲーム内日数）
         public int    max_party_size;           // 1案件の最大パーティ人数
         public float  agent_travel_speed;       // エージェントの移動速度（タイル/ゲーム時間）
+
+        // バトル設定
+        public int    battle_grid_radius;       // ヘックスグリッド半径 (3 → 37タイル)
+        public int    battle_max_turns;         // AutoResolve 上限ターン数
+        public float  battle_move_ap_cost;      // 移動1マスのAPコスト
+        public string battle_hp_stat;           // HPに使う derived stat id
+        public string battle_ap_stat;           // APに使う derived stat id
     }
 }

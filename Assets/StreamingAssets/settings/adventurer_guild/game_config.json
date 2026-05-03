@@ -1,4 +1,4 @@
-{
+﻿{
   "setting_id": "adventurer_guild",
   "organization_name": "Guild",
   "organization_label": "Guild Hall",
@@ -17,5 +17,10 @@
   "max_available_contracts": 6,
   "contract_gen_interval_days": 3.0,
   "max_party_size": 4,
-  "agent_travel_speed": 2.0
+  "agent_travel_speed": 2.0,
+  "battle_grid_radius": 3,
+  "battle_max_turns": 30,
+  "battle_move_ap_cost": 1.0,
+  "battle_hp_stat": "endurance",
+  "battle_ap_stat": "focus"
 }
