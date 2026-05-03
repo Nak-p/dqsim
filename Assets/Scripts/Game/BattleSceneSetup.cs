@@ -12,6 +12,8 @@ using AgentSim.Core;
 
 namespace AgentSim.Game
 {
+    public enum BattleGridShape { Hexagonal, Rectangular }
+
     [ExecuteAlways]
     public class BattleSceneSetup : MonoBehaviour
     {
@@ -20,9 +22,18 @@ namespace AgentSim.Game
         [Tooltip("StreamingAssets/settings/ 以下のフォルダ名")]
         [SerializeField] private string settingId = "adventurer_guild";
 
-        [Header("Grid")]
-        [Tooltip("0 = game_config.json の battle_grid_radius を使用")]
+        [Header("Grid Shape")]
+        [Tooltip("Hexagonal: 六角形フィールド / Rectangular: 矩形フィールド")]
+        [SerializeField] private BattleGridShape gridShape = BattleGridShape.Rectangular;
+
+        [Tooltip("Hexagonal モード: 0 = game_config.json の battle_grid_radius を使用")]
         [SerializeField, Range(0, 8)] private int gridRadiusOverride = 0;
+
+        [Tooltip("Rectangular モード: グリッドの幅（列数）")]
+        [SerializeField, Range(1, 21)] private int gridWidth  = 9;
+
+        [Tooltip("Rectangular モード: グリッドの高さ（行数）")]
+        [SerializeField, Range(1, 15)] private int gridHeight = 7;
 
         [Header("References")]
         [SerializeField] private Tilemap            hexTilemap;
@@ -67,9 +78,24 @@ namespace AgentSim.Game
             if (SettingsRegistry.Current == null)
                 SettingsRegistry.Load(settingId);
 
-            var cfg    = SettingsRegistry.Current.Game;
-            int radius = (gridRadiusOverride > 0) ? gridRadiusOverride : cfg.battle_grid_radius;
-            var grid   = new BattleGrid(radius);
+            var        cfg = SettingsRegistry.Current.Game;
+            BattleGrid grid;
+
+            if (gridShape == BattleGridShape.Rectangular)
+            {
+                grid = BattleGrid.CreateRect(gridWidth, gridHeight);
+                Debug.Log($"[BattleSceneSetup] Rebuilt — {cfg.organization_name} | " +
+                          $"矩形 {gridWidth}×{gridHeight} | " +
+                          $"P×{testPartySize} E×{testEnemyCount} seed={seed}");
+            }
+            else
+            {
+                int radius = (gridRadiusOverride > 0) ? gridRadiusOverride : cfg.battle_grid_radius;
+                grid = new BattleGrid(radius);
+                Debug.Log($"[BattleSceneSetup] Rebuilt — {cfg.organization_name} | " +
+                          $"六角形 半径 {radius} | " +
+                          $"P×{testPartySize} E×{testEnemyCount} seed={seed}");
+            }
 
             // グリッドを Tilemap に描画
             BattleTilemapRenderer.Render(grid, hexTilemap);
@@ -81,9 +107,6 @@ namespace AgentSim.Game
                 unitRenderer.Initialize(hexTilemap);
                 PlaceTestUnits(grid);
             }
-
-            Debug.Log($"[BattleSceneSetup] Rebuilt — {cfg.organization_name} | " +
-                      $"半径 {radius} | P×{testPartySize} E×{testEnemyCount} seed={seed}");
         }
 
         // ── テストユニット配置 ────────────────────────────────────────
