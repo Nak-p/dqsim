@@ -16,7 +16,8 @@ namespace AgentSim.Battle
     public static class BattleTilemapRenderer
     {
         // テクスチャサイズ（ピクセル）— アルゴリズム定数
-        private const int TileSize = 16;
+        // 64px で滑らかなヘックス形状を実現する
+        private const int TileSize = 64;
 
         // ── 公開 API ──────────────────────────────────────────────────
         /// <summary>
@@ -63,7 +64,7 @@ namespace AgentSim.Battle
                         return new Color(def.color[0], def.color[1], def.color[2], def.color[3]);
                 }
             }
-            // フォールバック: タイル種別に応じたグレースケール
+            // フォールバック
             return tileId switch
             {
                 "player_spawn" => new Color(0.2f, 0.3f, 0.5f),
@@ -74,12 +75,14 @@ namespace AgentSim.Battle
 
         private static Tile BuildTile(Color color)
         {
-            var pixels = DrawHexTile(TileSize, ToColor32(color));
-            var tex    = new Texture2D(TileSize, TileSize) { filterMode = FilterMode.Point };
-            tex.SetPixels32(pixels);
+            var pixels = DrawHexTile(TileSize, color);
+            // Bilinear フィルタで補間し、ヘックス境界をなめらかに表示
+            var tex    = new Texture2D(TileSize, TileSize, TextureFormat.RGBA32, false)
+                         { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+            tex.SetPixels(pixels);
             tex.Apply();
 
-            var tile   = ScriptableObject.CreateInstance<Tile>();
+            var tile    = ScriptableObject.CreateInstance<Tile>();
             tile.sprite = Sprite.Create(tex,
                 new Rect(0, 0, TileSize, TileSize),
                 new Vector2(0.5f, 0.5f),
@@ -88,26 +91,22 @@ namespace AgentSim.Battle
         }
 
         /// <summary>
-        /// ヘックス形状を描画した 16×16 テクスチャを生成する。
-        /// ヘックス外は透明（alpha=0）にし、枠線で各セルを視覚的に分離する。
+        /// ヘックス形状を描画した TileSize × TileSize テクスチャを生成する。
+        /// ・ヘックス外は透明（alpha=0）
+        /// ・外周 2px 分はソフトエッジ（アンチエイリアス代わり）
+        /// ・内側 1px は枠線（fill を暗くした色）
         /// </summary>
-        private static Color32[] DrawHexTile(int size, Color32 fill)
+        private static Color[] DrawHexTile(int size, Color fill)
         {
-            var pixels   = new Color32[size * size];
-            var transparent = new Color32(0, 0, 0, 0);
-            // 枠線色: fill を暗くしたアルゴリズム定数
-            var border   = new Color32(
-                (byte)(fill.r / 2),
-                (byte)(fill.g / 2),
-                (byte)(fill.b / 2),
-                0xff);
+            var pixels  = new Color[size * size];
+            // 枠線色: fill を暗くする（アルゴリズム定数）
+            var border  = new Color(fill.r * 0.45f, fill.g * 0.45f, fill.b * 0.45f, 1f);
 
-            float cx = size * 0.5f;
-            float cy = size * 0.5f;
-            // flat-top hex の外接円半径
-            float outerR = size * 0.48f;
-            // 枠線幅（内側へ）
-            float innerR = outerR - 1.5f;
+            float cx     = size * 0.5f;
+            float cy     = size * 0.5f;
+            float outerR = size * 0.47f;   // ヘックス外接半径（ピクセル）
+            float softW  = size * 0.025f;  // ソフトエッジの幅
+            float borderW = size * 0.05f;  // 枠線の幅
 
             for (int y = 0; y < size; y++)
             {
@@ -116,20 +115,29 @@ namespace AgentSim.Battle
                     float px = x + 0.5f - cx;
                     float py = y + 0.5f - cy;
 
-                    // キューブ座標距離でヘックス内判定（flat-top hex）
-                    // Chebyshev: max(|q|, |r|, |s|) <= r  を軸方向で近似
-                    // より正確な判定: hex距離 <= 1 を正規化座標で計算
-                    float hexDist = HexDistance(px / outerR, py / outerR);
-                    if (hexDist > 1.0f)
+                    // 正規化した flat-top hex 距離（1.0 = 境界）
+                    float dist = HexDistance(px / outerR, py / outerR);
+
+                    if (dist >= 1f + softW / outerR)
                     {
-                        pixels[y * size + x] = transparent;
+                        // ヘックス外: 透明
+                        pixels[y * size + x] = Color.clear;
                     }
-                    else if (hexDist > innerR / outerR)
+                    else if (dist >= 1f - softW / outerR)
                     {
+                        // ソフトエッジ: fillへフェード
+                        float t = (dist - (1f - softW / outerR)) / (2f * softW / outerR);
+                        float a = 1f - Mathf.Clamp01(t);
+                        pixels[y * size + x] = new Color(fill.r, fill.g, fill.b, a);
+                    }
+                    else if (dist >= 1f - (softW + borderW) / outerR)
+                    {
+                        // 枠線帯
                         pixels[y * size + x] = border;
                     }
                     else
                     {
+                        // 内部: fill
                         pixels[y * size + x] = fill;
                     }
                 }
@@ -138,24 +146,15 @@ namespace AgentSim.Battle
         }
 
         /// <summary>
-        /// 正規化座標 (px, py) が flat-top hex 内かどうかの距離（0=中心, 1=境界）。
+        /// 正規化座標 (px, py) の flat-top hex 距離を返す（0=中心, 1=境界）。
         /// </summary>
         private static float HexDistance(float px, float py)
         {
-            // flat-top hexagon の半径1の境界判定
-            // |px| <= 1, |px * 0.5 + py * sqrt3/2| <= 1, |px * 0.5 - py * sqrt3/2| <= 1
             const float Sqrt3Over2 = 0.8660254f;
             float a = Mathf.Abs(px);
             float b = Mathf.Abs(px * 0.5f + py * Sqrt3Over2);
             float c = Mathf.Abs(px * 0.5f - py * Sqrt3Over2);
             return Mathf.Max(a, Mathf.Max(b, c));
         }
-
-        private static Color32 ToColor32(Color c) =>
-            new Color32(
-                (byte)(c.r * 255),
-                (byte)(c.g * 255),
-                (byte)(c.b * 255),
-                (byte)(c.a * 255));
     }
 }

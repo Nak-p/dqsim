@@ -15,8 +15,8 @@ namespace AgentSim.Battle
     public class BattleUnitRenderer : MonoBehaviour
     {
         // ── 内部状態 ──────────────────────────────────────────────────
-        private Tilemap                          _tilemap;
-        private Dictionary<string, GameObject>   _unitObjects; // AgentId → GameObject
+        private Tilemap                        _tilemap;
+        private Dictionary<string, GameObject> _unitObjects; // AgentId → GameObject
 
         // アイコンサイズ（ピクセル）— アルゴリズム定数
         private const int IconSize = 12;
@@ -28,10 +28,20 @@ namespace AgentSim.Battle
             _unitObjects = new Dictionary<string, GameObject>();
         }
 
+        /// <summary>全ユニットアイコンを削除してリセットする。Rebuild 時に呼ぶ。</summary>
+        public void ClearAll()
+        {
+            if (_unitObjects == null) return;
+            foreach (var go in _unitObjects.Values)
+                if (go != null) DestroyImmediate(go);
+            _unitObjects.Clear();
+        }
+
         // ── ユニット操作 ──────────────────────────────────────────────
         /// <summary>ユニットのアイコンをグリッド上に配置する。</summary>
         public void PlaceUnit(BattleUnit unit)
         {
+            if (_unitObjects == null) _unitObjects = new Dictionary<string, GameObject>();
             if (_unitObjects.ContainsKey(unit.AgentId)) return;
 
             var color  = GetUnitColor(unit.Team);
@@ -41,10 +51,9 @@ namespace AgentSim.Battle
             go.transform.SetParent(transform, false);
             go.transform.position = GetWorldPos(unit.Position);
 
-            var sr           = go.AddComponent<SpriteRenderer>();
-            sr.sprite        = sprite;
-            sr.sortingOrder  = 10;
-            // タイルより少し小さく表示（アイコンがタイルの 60% サイズ）
+            var sr          = go.AddComponent<SpriteRenderer>();
+            sr.sprite       = sprite;
+            sr.sortingOrder = 10;
             go.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
 
             _unitObjects[unit.AgentId] = go;
@@ -53,14 +62,14 @@ namespace AgentSim.Battle
         /// <summary>ユニットアイコンを新しいタイルへ移動する。</summary>
         public void MoveUnit(BattleUnit unit, HexCoord to)
         {
-            if (!_unitObjects.TryGetValue(unit.AgentId, out var go)) return;
+            if (_unitObjects == null || !_unitObjects.TryGetValue(unit.AgentId, out var go)) return;
             go.transform.position = GetWorldPos(to);
         }
 
         /// <summary>ユニットアイコンを削除する。</summary>
         public void RemoveUnit(BattleUnit unit)
         {
-            if (!_unitObjects.TryGetValue(unit.AgentId, out var go)) return;
+            if (_unitObjects == null || !_unitObjects.TryGetValue(unit.AgentId, out var go)) return;
             Destroy(go);
             _unitObjects.Remove(unit.AgentId);
         }
@@ -86,26 +95,19 @@ namespace AgentSim.Battle
                     (byte)(raw[2] * 255),
                     (byte)(raw[3] * 255));
 
-            // フォールバック: プレイヤー=青、敵=赤
+            // フォールバック
             return team == BattleTeam.Player
                 ? new Color32(0x60, 0xa0, 0xff, 0xff)
                 : new Color32(0xff, 0x60, 0x60, 0xff);
         }
 
-        /// <summary>
-        /// 指定色のユニットアイコンスプライトを手続き生成する。
-        /// PartyController のアイコン生成と同じパターン。
-        /// </summary>
         private static Sprite CreateUnitSprite(Color32 body)
         {
             var tex    = new Texture2D(IconSize, IconSize) { filterMode = FilterMode.Point };
             var pixels = new Color32[IconSize * IconSize];
             var bg     = new Color32(0, 0, 0, 0);
             var dark   = new Color32(
-                (byte)(body.r / 2),
-                (byte)(body.g / 2),
-                (byte)(body.b / 2),
-                0xff);
+                (byte)(body.r / 2), (byte)(body.g / 2), (byte)(body.b / 2), 0xff);
 
             for (int i = 0; i < pixels.Length; i++) pixels[i] = bg;
 
@@ -121,8 +123,7 @@ namespace AgentSim.Battle
             tex.Apply();
             return Sprite.Create(tex,
                 new Rect(0, 0, IconSize, IconSize),
-                new Vector2(0.5f, 0.5f),
-                IconSize);
+                new Vector2(0.5f, 0.5f), IconSize);
         }
 
         private static void SetRect(Color32[] pixels, int size,
