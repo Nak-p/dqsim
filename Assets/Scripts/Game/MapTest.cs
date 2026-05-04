@@ -55,14 +55,14 @@ public class MapTest : MonoBehaviour
         // 条件を満たせる (案件, エージェント) の組み合わせを自動検索
         foreach (var contract in dispatchManager.AvailableContracts)
         {
-            foreach (var agent in dispatchManager.Roster)
+            foreach (var character in dispatchManager.Roster)
             {
-                if (!agent.IsAvailable) continue;
-                var party = new List<Agent> { agent };
+                if (!character.IsAvailable) continue;
+                var party = new List<Character> { character };
                 if (!dispatchManager.CanDispatch(contract, party)) continue;
 
                 dispatchManager.Dispatch(contract, party);
-                Debug.Log($"[Test] 派遣: {agent.Name}({agent.TierId}) → {contract.Title}({contract.MinTierId})");
+                Debug.Log($"[Test] 派遣: {character.Name}({character.TierId}) → {contract.Title}({contract.MinTierId})");
                 return;
             }
         }

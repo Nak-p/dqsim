@@ -16,7 +16,7 @@ namespace AgentSim.Battle
     {
         // ── 内部状態 ──────────────────────────────────────────────────
         private Tilemap                        _tilemap;
-        private Dictionary<string, GameObject> _unitObjects; // AgentId → GameObject
+        private Dictionary<string, GameObject> _unitObjects; // CharacterId → GameObject
 
         // アイコンサイズ（ピクセル）— アルゴリズム定数
         private const int IconSize = 12;
@@ -55,12 +55,12 @@ namespace AgentSim.Battle
         public void PlaceUnit(BattleUnit unit)
         {
             if (_unitObjects == null) _unitObjects = new Dictionary<string, GameObject>();
-            if (_unitObjects.ContainsKey(unit.AgentId)) return;
+            if (_unitObjects.ContainsKey(unit.CharacterId)) return;
 
             var color  = GetUnitColor(unit.Team);
             var sprite = CreateUnitSprite(color);
 
-            var go = new GameObject($"Unit_{unit.AgentName}");
+            var go = new GameObject($"Unit_{unit.CharacterName}");
             go.transform.SetParent(transform, false);
             go.transform.position = GetWorldPos(unit.Position);
 
@@ -69,22 +69,22 @@ namespace AgentSim.Battle
             sr.sortingOrder = 10;
             go.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
 
-            _unitObjects[unit.AgentId] = go;
+            _unitObjects[unit.CharacterId] = go;
         }
 
         /// <summary>ユニットアイコンを新しいタイルへ移動する。</summary>
         public void MoveUnit(BattleUnit unit, HexCoord to)
         {
-            if (_unitObjects == null || !_unitObjects.TryGetValue(unit.AgentId, out var go)) return;
+            if (_unitObjects == null || !_unitObjects.TryGetValue(unit.CharacterId, out var go)) return;
             go.transform.position = GetWorldPos(to);
         }
 
         /// <summary>ユニットアイコンを削除する。</summary>
         public void RemoveUnit(BattleUnit unit)
         {
-            if (_unitObjects == null || !_unitObjects.TryGetValue(unit.AgentId, out var go)) return;
+            if (_unitObjects == null || !_unitObjects.TryGetValue(unit.CharacterId, out var go)) return;
             Destroy(go);
-            _unitObjects.Remove(unit.AgentId);
+            _unitObjects.Remove(unit.CharacterId);
         }
 
         // ── 内部ユーティリティ ────────────────────────────────────────

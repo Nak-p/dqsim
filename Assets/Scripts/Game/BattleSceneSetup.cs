@@ -121,16 +121,16 @@ namespace AgentSim.Game
 
             for (int i = 0; i < playerCount; i++)
             {
-                var agent = Agent.Generate(rng);
-                var unit  = new BattleUnit(agent, BattleTeam.Player);
+                var character = Character.Generate(rng);
+                var unit  = new BattleUnit(character, BattleTeam.Player);
                 if (grid.PlaceUnit(unit, leftHexes[i]))
                     unitRenderer.PlaceUnit(unit);
             }
 
             for (int i = 0; i < enemyCount; i++)
             {
-                var agent = Agent.Generate(rng);
-                var unit  = new BattleUnit(agent, BattleTeam.Enemy);
+                var character = Character.Generate(rng);
+                var unit  = new BattleUnit(character, BattleTeam.Enemy);
                 if (grid.PlaceUnit(unit, rightHexes[i]))
                     unitRenderer.PlaceUnit(unit);
             }
