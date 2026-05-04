@@ -28,13 +28,26 @@ namespace AgentSim.Battle
             _unitObjects = new Dictionary<string, GameObject>();
         }
 
-        /// <summary>全ユニットアイコンを削除してリセットする。Rebuild 時に呼ぶ。</summary>
+        /// <summary>
+        /// 全ユニットアイコンを削除してリセットする。Rebuild 時に呼ぶ。
+        /// 辞書に加え、ドメインリロード等で孤立した子 GameObject も一掃する。
+        /// </summary>
         public void ClearAll()
         {
-            if (_unitObjects == null) return;
-            foreach (var go in _unitObjects.Values)
-                if (go != null) DestroyImmediate(go);
-            _unitObjects.Clear();
+            // 辞書経由で削除
+            if (_unitObjects != null)
+            {
+                foreach (var go in _unitObjects.Values)
+                    if (go != null) DestroyImmediate(go);
+                _unitObjects.Clear();
+            }
+
+            // ドメインリロード等で辞書と乖離した孤立 GameObject も一掃
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                var child = transform.GetChild(i);
+                if (child != null) DestroyImmediate(child.gameObject);
+            }
         }
 
         // ── ユニット操作 ──────────────────────────────────────────────
