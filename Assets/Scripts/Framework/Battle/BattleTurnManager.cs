@@ -146,11 +146,9 @@ namespace AgentSim.Battle
             if (_camera == null || _highlightTilemap == null) return;
 
             var mousePos = Mouse.current.position.ReadValue();
-            var ray = _camera.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0f));
-            float dist;
-            if (!new Plane(Vector3.forward, Vector3.zero).Raycast(ray, out dist)) return;
-
-            var worldPos = ray.GetPoint(dist);
+            // 2D 直交投影カメラ: z オフセットでワールド座標を得る
+            var worldPos = _camera.ScreenToWorldPoint(
+                new Vector3(mousePos.x, mousePos.y, -_camera.transform.position.z));
             var cellPos  = _highlightTilemap.WorldToCell(worldPos);
             var hex      = new HexCoord(cellPos.x, cellPos.y);
 
@@ -288,3 +286,4 @@ namespace AgentSim.Battle
         }
     }
 }
+

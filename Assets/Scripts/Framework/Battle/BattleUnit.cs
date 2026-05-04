@@ -41,7 +41,7 @@ namespace AgentSim.Battle
             var cfg = SettingsRegistry.Current.Game;
             MaxHp     = Stats.GetDerived(cfg.battle_hp_stat);
             CurrentHp = MaxHp;
-            MaxAp     = Stats.GetDerived(cfg.battle_ap_stat);
+            MaxAp     = cfg.battle_ap_initial > 0 ? cfg.battle_ap_initial : Stats.GetDerived(cfg.battle_ap_stat);
             CurrentAp = MaxAp;
         }
 
@@ -57,3 +57,4 @@ namespace AgentSim.Battle
         public int GetSpeedStat() => Stats.TotalPower;
     }
 }
+

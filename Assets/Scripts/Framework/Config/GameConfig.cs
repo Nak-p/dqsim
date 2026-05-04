@@ -45,5 +45,7 @@ namespace AgentSim.Config
         public float  battle_move_ap_cost;      // 移動1マスのAPコスト
         public string battle_hp_stat;           // HPに使う derived stat id
         public string battle_ap_stat;           // APに使う derived stat id
+        public float  battle_ap_initial;        // バトル開始時の初期AP（ターンごとにリセット）
     }
 }
+
