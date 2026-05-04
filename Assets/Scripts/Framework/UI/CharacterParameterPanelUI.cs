@@ -30,18 +30,43 @@ namespace AgentSim.UI
         private bool    _visible       = true;
         private int     _selectedIndex = -1;
         private Vector2 _rosterScroll;
+        private bool    _initialized   = false;
 
         // derived stat キャッシュ（OnStateChanged 時のみ再計算）
         private readonly Dictionary<string, int> _derivedCache = new Dictionary<string, int>();
         private int _cachedTotalPower;
 
-        // ── 初期化 ────────────────────────────────────────────────────
-        /// <summary>GameBootstrap から呼ぶ。</summary>
+        // ── Unity ライフサイクル ──────────────────────────────────────
+        private void Start()
+        {
+            // Inspector 未設定の場合はシーン内から自動検索
+            if (dispatchManager == null)
+                dispatchManager = FindFirstObjectByType<DispatchManager>();
+
+            if (dispatchManager != null)
+                SetupSubscription();
+        }
+
+        private void SetupSubscription()
+        {
+            if (_initialized) return;
+            _initialized = true;
+
+            dispatchManager.OnStateChanged += OnStateChanged;
+
+            // 既にロスターが生成済みの場合も正しく表示されるよう即時更新
+            OnStateChanged();
+        }
+
+        // ── 公開 API（GameBootstrap からの明示的初期化用） ────────────
+        /// <summary>
+        /// GameBootstrap から呼ぶ場合はこちら。
+        /// 呼ばない場合は Start() でシーン内から自動検索する。
+        /// </summary>
         public void Initialize(DispatchManager dm)
         {
             dispatchManager = dm;
-            dm.OnStateChanged += OnStateChanged;
-            OnStateChanged(); // 初期ロード
+            SetupSubscription();
         }
 
         private void OnDestroy()
@@ -78,9 +103,8 @@ namespace AgentSim.UI
             if (statDefs == null) return;
 
             foreach (var def in statDefs.derived_stats)
-            {
                 _derivedCache[def.id] = character.Stats.GetDerived(def.id);
-            }
+
             _cachedTotalPower = character.Stats.TotalPower;
         }
 
@@ -98,6 +122,14 @@ namespace AgentSim.UI
             if (!_visible) return;
             if (SettingsRegistry.Current == null) return;
 
+            // DispatchManager がまだ見つかっていない場合は再試行
+            if (dispatchManager == null)
+            {
+                dispatchManager = FindFirstObjectByType<DispatchManager>();
+                if (dispatchManager != null) SetupSubscription();
+                else return;
+            }
+
             // 画面中央にパネルを配置
             float px = (Screen.width  - PanelWidth)  * 0.5f;
             float py = (Screen.height - PanelHeight) * 0.5f;
@@ -114,15 +146,11 @@ namespace AgentSim.UI
         // ── ヘッダー ──────────────────────────────────────────────────
         private void DrawHeader(Rect r)
         {
-            // タイトル: characters_term（例: "Adventurers" / "Units"）
             string title = SettingsRegistry.Current?.Game?.characters_term ?? "Characters";
             GUI.Label(new Rect(r.x, r.y, r.width - 80f, r.height), title,
                       UIStyleProvider.TitleStyle);
-
-            // ヒント
-            var hintStyle = UIStyleProvider.LabelStyle;
             GUI.Label(new Rect(r.x + r.width - 80f, r.y, 76f, r.height),
-                      "[Tab: hide]", hintStyle);
+                      "[Tab: hide]", UIStyleProvider.LabelStyle);
         }
 
         // ── ロスター一覧（左ペイン） ──────────────────────────────────
@@ -135,7 +163,6 @@ namespace AgentSim.UI
                 return;
             }
 
-            // スクロールビュー
             float contentHeight = roster.Count * RowHeight + 4f;
             var scrollContent   = new Rect(0, 0, r.width - 16f, contentHeight);
 
@@ -143,14 +170,11 @@ namespace AgentSim.UI
 
             for (int i = 0; i < roster.Count; i++)
             {
-                var character = roster[i];
                 bool isSelected = (i == _selectedIndex);
+                var  rowRect    = new Rect(0, i * RowHeight, scrollContent.width, RowHeight);
+                var  style      = isSelected ? UIStyleProvider.SelectedRow : UIStyleProvider.NormalRow;
 
-                var rowRect = new Rect(0, i * RowHeight, scrollContent.width, RowHeight);
-                var style   = isSelected ? UIStyleProvider.SelectedRow : UIStyleProvider.NormalRow;
-
-                // クリックで選択
-                if (GUI.Button(rowRect, character.ShortLabel, style))
+                if (GUI.Button(rowRect, roster[i].ShortLabel, style))
                 {
                     _selectedIndex = i;
                     RebuildDerivedCache();
@@ -171,8 +195,8 @@ namespace AgentSim.UI
                 return;
             }
 
-            var character = dispatchManager.Roster[_selectedIndex];
-            CharacterDetailRenderer.Draw(r, character, _derivedCache, _cachedTotalPower);
+            CharacterDetailRenderer.Draw(r, dispatchManager.Roster[_selectedIndex],
+                                         _derivedCache, _cachedTotalPower);
         }
     }
 }
