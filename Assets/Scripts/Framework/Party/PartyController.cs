@@ -1,7 +1,7 @@
 // Assets/Scripts/Framework/Party/PartyController.cs
 // AgentSim — マップ上のパーティ移動アニメーション MonoBehaviour
 //
-// 移動速度は SettingsRegistry.Current.Game.agent_travel_speed を動的参照する。
+// 移動速度は SettingsRegistry.Current.Game.character_travel_speed を動的参照する。
 // パーティの色は呼び出し元が Color32 で渡す（世界観非依存）。
 
 using System;
@@ -73,8 +73,8 @@ namespace AgentSim.Party
         {
             if (!_isMoving || _timeManager == null || _timeManager.IsPaused) return;
 
-            // 移動速度を JSON 設定から動的参照（agent_travel_speed: タイル/ゲーム内時間）
-            float partySpeed = SettingsRegistry.Current?.Game?.agent_travel_speed ?? 1f;
+            // 移動速度を JSON 設定から動的参照（character_travel_speed: タイル/ゲーム内時間）
+            float partySpeed = SettingsRegistry.Current?.Game?.character_travel_speed ?? 1f;
 
             float gameSecondsPerRealSecond = 86400f / _timeManager.RealSecondsPerGameDay;
             float inGameHoursThisFrame     = Time.deltaTime * gameSecondsPerRealSecond / 3600f;
