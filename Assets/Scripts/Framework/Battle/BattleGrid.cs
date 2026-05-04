@@ -1,7 +1,8 @@
 ﻿// Assets/Scripts/Framework/Battle/BattleGrid.cs
 // AgentSim — ヘックスバトルグリッドの状態管理
 //
-// 有効タイルセットとユニット配置を保持する。
+// 座標系: Q=縦軸(Y in Tilemap)、R=横軸(X in Tilemap)
+// スポーン: R <= -SpawnThreshold = 左(Player)、R >= SpawnThreshold = 右(Enemy)
 // Unity 非依存（System のみ）。
 
 using System;
@@ -16,14 +17,16 @@ namespace AgentSim.Battle
         private readonly Dictionary<HexCoord, BattleUnit> _occupants;
 
         public int Radius         { get; }
-        /// <summary>スポーン境界となる Q 座標の絶対値。Q &lt;= -Threshold が左、Q &gt;= Threshold が右。</summary>
+        /// <summary>
+        /// スポーン境界。R &lt;= -SpawnThreshold が左(Player)、R &gt;= SpawnThreshold が右(Enemy)。
+        /// </summary>
         public int SpawnThreshold { get; private set; }
 
-        // ── Hex コンストラクタ ─────────────────────────────────────────
+        // ── Hex コンストラクタ（六角形フィールド）───────────────────────
         public BattleGrid(int radius)
         {
             Radius         = radius;
-            SpawnThreshold = 1;
+            SpawnThreshold = Math.Max(1, radius - 1);
             _validHexes    = new HashSet<HexCoord>();
             _occupants     = new Dictionary<HexCoord, BattleUnit>();
 
@@ -44,20 +47,23 @@ namespace AgentSim.Battle
         // ── 矩形グリッドファクトリ ─────────────────────────────────────
         /// <summary>
         /// width × height の矩形ヘックスグリッドを生成する。
-        /// Q in [-(width/2), -(width/2)+width-1]、R in [-(height/2), -(height/2)+height-1]。
-        /// Unity Hexagonal Point Top Tilemap に対応。
+        /// R が横軸 (width 個)、Q が縦軸 (height 個)。
+        /// Unity Hexagonal Tilemap: HexToTilemapPos = (Q, R, 0) → X=Q(縦), Y=R(横)。
         /// </summary>
         public static BattleGrid CreateRect(int width, int height)
         {
-            int qMin      = -(width  / 2);
-            int qMax      = qMin + width  - 1;
-            int rMin      = -(height / 2);
-            int rMax      = rMin + height - 1;
-            int threshold = Math.Max(1, width / 4);
+            // R = 横軸 → width で決まる
+            int rMin = -(width  / 2);
+            int rMax = rMin + width  - 1;
+            // Q = 縦軸 → height で決まる
+            int qMin = -(height / 2);
+            int qMax = qMin + height - 1;
+            // スポーン幅 = 横(R)の約 1/3
+            int threshold = Math.Max(1, width / 3);
 
             var hexes = new HashSet<HexCoord>();
-            for (int r = rMin; r <= rMax; r++)
-                for (int q = qMin; q <= qMax; q++)
+            for (int q = qMin; q <= qMax; q++)
+                for (int r = rMin; r <= rMax; r++)
                     hexes.Add(new HexCoord(q, r));
 
             return new BattleGrid(hexes, threshold);
@@ -97,18 +103,43 @@ namespace AgentSim.Battle
         public void RemoveUnit(BattleUnit unit) => _occupants.Remove(unit.Position);
 
         // ── スポーン位置取得 ────────────────────────────────────────────
-        /// <summary>プレイヤー側スポーン（Q &lt;= -SpawnThreshold）を Q 昇順で返す。</summary>
-        public List<HexCoord> GetLeftSpawnHexes()  => GetSpawnHexes(q => q <= -SpawnThreshold);
-
-        /// <summary>敵側スポーン（Q &gt;= SpawnThreshold）を Q 昇順で返す。</summary>
-        public List<HexCoord> GetRightSpawnHexes() => GetSpawnHexes(q => q >=  SpawnThreshold);
-
-        private List<HexCoord> GetSpawnHexes(Func<int, bool> qFilter)
+        /// <summary>
+        /// 左(Player)スポーン: R &lt;= -SpawnThreshold。
+        /// 内側（中央寄り）→外側、縦中央行から順に返す。
+        /// </summary>
+        public List<HexCoord> GetLeftSpawnHexes()
         {
             var result = new List<HexCoord>();
             foreach (var hex in _validHexes)
-                if (qFilter(hex.Q)) result.Add(hex);
-            result.Sort((a, b) => a.Q != b.Q ? a.Q.CompareTo(b.Q) : a.R.CompareTo(b.R));
+                if (hex.R <= -SpawnThreshold) result.Add(hex);
+
+            // R 降順（内側=0に近い方が先）、同R内は |Q| 昇順（縦中央が先）
+            result.Sort((a, b) =>
+            {
+                if (a.R != b.R) return b.R.CompareTo(a.R);
+                int qa = Math.Abs(a.Q), qb = Math.Abs(b.Q);
+                return qa != qb ? qa.CompareTo(qb) : b.Q.CompareTo(a.Q);
+            });
+            return result;
+        }
+
+        /// <summary>
+        /// 右(Enemy)スポーン: R &gt;= SpawnThreshold。
+        /// 内側（中央寄り）→外側、縦中央行から順に返す。
+        /// </summary>
+        public List<HexCoord> GetRightSpawnHexes()
+        {
+            var result = new List<HexCoord>();
+            foreach (var hex in _validHexes)
+                if (hex.R >= SpawnThreshold) result.Add(hex);
+
+            // R 昇順（内側=0に近い方が先）、同R内は |Q| 昇順（縦中央が先）
+            result.Sort((a, b) =>
+            {
+                if (a.R != b.R) return a.R.CompareTo(b.R);
+                int qa = Math.Abs(a.Q), qb = Math.Abs(b.Q);
+                return qa != qb ? qa.CompareTo(qb) : b.Q.CompareTo(a.Q);
+            });
             return result;
         }
     }

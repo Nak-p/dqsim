@@ -4,8 +4,9 @@
 // 色は BattleVisualConfig (battle_visual.json) から読み込む。
 // C# に色定数・パターン数値をハードコーディングしてはいけない。
 //
+// 座標系: Q=縦軸(Tilemap X)、R=横軸(Tilemap Y)
+// スポーン色: R <= -threshold → player_spawn(青/左)、R >= threshold → enemy_spawn(赤/右)
 // Unity Grid 設定: Cell Layout = Hexagonal Point Top
-// 座標変換: HexCoord (axial) → Vector3Int (tilemap offset)
 
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -27,25 +28,31 @@ namespace AgentSim.Battle
             foreach (var hex in grid.AllHexes)
             {
                 string tileId = GetTileId(hex, grid);
-                var color     = GetTileColor(tileId, visual);
-                var tile      = BuildTile(color);
+                var    color  = GetTileColor(tileId, visual);
+                var    tile   = BuildTile(color);
                 tilemap.SetTile(HexToTilemapPos(hex), tile);
             }
         }
 
         /// <summary>
         /// HexCoord (axial) → Unity Tilemap 座標。
-        /// Hexagonal Point Top グリッドに対応。
+        /// Q=Tilemap X (縦方向)、R=Tilemap Y (横方向)。
         /// </summary>
         public static Vector3Int HexToTilemapPos(HexCoord hex)
             => new Vector3Int(hex.Q, hex.R, 0);
 
         // ── 内部ロジック ──────────────────────────────────────────────
+        /// <summary>
+        /// R (横軸) でスポーンゾーンを判定。
+        /// R &lt;= -threshold → player_spawn (左/青)
+        /// R &gt;= threshold  → enemy_spawn  (右/赤)
+        /// それ以外         → floor        (中央/暗)
+        /// </summary>
         private static string GetTileId(HexCoord hex, BattleGrid grid)
         {
             int threshold = grid.SpawnThreshold;
-            if (hex.Q <= -threshold) return "player_spawn";
-            if (hex.Q >=  threshold) return "enemy_spawn";
+            if (hex.R <= -threshold) return "player_spawn";
+            if (hex.R >=  threshold) return "enemy_spawn";
             return "floor";
         }
 
@@ -116,7 +123,7 @@ namespace AgentSim.Battle
             return pixels;
         }
 
-        /// <summary>Flat-top hex 距離（入れ替えて使うことで Point-top になる）。</summary>
+        /// <summary>Flat-top hex 距離（入れ替えて呼ぶことで Point-top になる）。</summary>
         private static float HexDistance(float px, float py)
         {
             const float Sqrt3Over2 = 0.8660254f;
