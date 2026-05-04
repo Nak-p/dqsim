@@ -25,7 +25,7 @@ namespace AgentSim.Core
         /// <summary>
         /// formula 文字列を AgentStats を使って評価し、結果を float で返す。
         /// </summary>
-        public static float Evaluate(string formula, AgentStats stats, StatDefinitions statDefs)
+        public static float Evaluate(string formula, CharacterStats stats, StatDefinitions statDefs)
         {
             var tokens = Tokenize(formula, stats, statDefs);
             var rpn    = ToRPN(tokens);
@@ -42,7 +42,7 @@ namespace AgentSim.Core
         }
 
         // ── トークナイズ ──────────────────────────────────────────────
-        private static List<Token> Tokenize(string formula, AgentStats stats, StatDefinitions defs)
+        private static List<Token> Tokenize(string formula, CharacterStats stats, StatDefinitions defs)
         {
             var result = new List<Token>();
             int i = 0;
@@ -97,7 +97,7 @@ namespace AgentSim.Core
             return result;
         }
 
-        private static float ResolveStatId(string id, AgentStats stats, StatDefinitions defs)
+        private static float ResolveStatId(string id, CharacterStats stats, StatDefinitions defs)
         {
             // primary stat の id として解決を試みる
             for (int i = 0; i < defs.primary_stats.Length; i++)

@@ -1,15 +1,16 @@
-// Assets/Scripts/Framework/Core/Agent.cs
-// AgentSim — 派遣可能なエージェント（冒険者 / ロボット / 傭兵 など）
+// Assets/Scripts/Framework/Core/Character.cs
+// AgentSim — 派遣可能なキャラクター（冒険者 / ロボット / 傭兵 など）
 //
 // 世界観の名称（職業名・ランク名など）は C# に書かず、
 // roleId / originId / tierId の id 文字列を通じて JSON から取得する。
+// ※ Agent（経営者＝プレイヤー）とは別物。
 
 using System;
 using AgentSim.Config;
 
 namespace AgentSim.Core
 {
-    public class Agent
+    public class Character
     {
         // ── 識別 ──────────────────────────────────────────────────────
         public string Id { get; } = Guid.NewGuid().ToString();
@@ -24,7 +25,7 @@ namespace AgentSim.Core
         public string TierId;    // "copper", "iron", "mark_i" など
 
         // ── ステータス ────────────────────────────────────────────────
-        public AgentStats Stats;
+        public CharacterStats Stats;
 
         // ── 状態 ──────────────────────────────────────────────────────
         public bool IsAvailable = true;
@@ -48,9 +49,9 @@ namespace AgentSim.Core
 
         // ── 生成ファクトリ ────────────────────────────────────────────
         /// <summary>
-        /// SettingsRegistry の設定に基づいてランダムなエージェントを生成する。
+        /// SettingsRegistry の設定に基づいてランダムなキャラクターを生成する。
         /// </summary>
-        public static Agent Generate(System.Random rng)
+        public static Character Generate(System.Random rng)
         {
             var reg = SettingsRegistry.Current;
 
@@ -69,18 +70,18 @@ namespace AgentSim.Core
             string name = origin.name_pool[rng.Next(origin.name_pool.Length)];
 
             // ステータス生成
-            var stats = AgentStats.Generate(role, origin, tier, rng);
+            var stats = CharacterStats.Generate(role, origin, tier, rng);
 
-            return new Agent
+            return new Character
             {
-                Name           = name,
-                Age            = rng.Next(18, 56),
-                RoleId         = role.id,
-                OriginId       = origin.id,
-                TierId         = tier.id,
-                Stats          = stats,
-                IsAvailable    = true,
-                EarnedCurrency = 0,
+                Name            = name,
+                Age             = rng.Next(18, 56),
+                RoleId          = role.id,
+                OriginId        = origin.id,
+                TierId          = tier.id,
+                Stats           = stats,
+                IsAvailable     = true,
+                EarnedCurrency  = 0,
                 CurrentCurrency = 0,
             };
         }

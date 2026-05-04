@@ -24,7 +24,7 @@ namespace AgentSim.Core
 
         // ── 内容 ──────────────────────────────────────────────────────
         public Contract          Contract;
-        public List<Agent>       Party;
+        public List<Character>       Party;
 
         // ── ビジュアル（DispatchManager が設定） ─────────────────────
         public PartyController   PartyController;

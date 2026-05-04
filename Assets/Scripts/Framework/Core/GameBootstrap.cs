@@ -7,6 +7,7 @@
 using UnityEngine;
 using AgentSim.Config;
 using AgentSim.Systems;
+using AgentSim.UI;
 
 namespace AgentSim.Core
 {
@@ -19,6 +20,10 @@ namespace AgentSim.Core
 
         [Header("Systems")]
         [SerializeField] private TimeManager timeManager;
+
+        [Header("UI")]
+        [SerializeField] private DispatchManager          dispatchManager;
+        [SerializeField] private CharacterParameterPanelUI paramPanel;
 
         // ── Unity ライフサイクル ──────────────────────────────────────
         private void Awake()
@@ -36,7 +41,10 @@ namespace AgentSim.Core
             // 今後ここに各マネージャーの初期化を追加する:
             // mapGenerator.Initialize();
             // dispatchManager.Initialize();
-            // uiController.Initialize();
+
+            // UI 初期化（dispatchManager が設定されているときのみ）
+            if (paramPanel != null && dispatchManager != null)
+                paramPanel.Initialize(dispatchManager);
         }
 
         // ── 開発用ユーティリティ ──────────────────────────────────────
@@ -63,10 +71,10 @@ namespace AgentSim.Core
 
             Debug.Log(
                 $"[AgentSim] Config Summary — {g.organization_name}\n" +
-                $"  Currency : {g.currency_name} ({g.currency_symbol})\n" +
-                $"  Agent    : {g.agents_term}  Contract: {g.contracts_term}\n" +
-                $"  Stats    : {s.primary_stats.Length} primary, {s.derived_stats.Length} derived\n" +
-                $"  Tiers    : {t.tiers.Length}  Roles: {r.roles.Length}"
+                $"  Currency  : {g.currency_name} ({g.currency_symbol})\n" +
+                $"  Character : {g.characters_term}  Contract: {g.contracts_term}\n" +
+                $"  Stats     : {s.primary_stats.Length} primary, {s.derived_stats.Length} derived\n" +
+                $"  Tiers     : {t.tiers.Length}  Roles: {r.roles.Length}"
             );
         }
 #endif

@@ -1,5 +1,5 @@
-// Assets/Scripts/Framework/Core/AgentStats.cs
-// AgentSim — エージェントのステータスコンテナ
+// Assets/Scripts/Framework/Core/CharacterStats.cs
+// AgentSim — キャラクターのステータスコンテナ
 //
 // ステータス名・導出式はすべて JSON(stat_definitions.json) から読み込む。
 // C# にステータス名・数値をハードコーディングしてはいけない。
@@ -9,7 +9,7 @@ using AgentSim.Config;
 
 namespace AgentSim.Core
 {
-    public class AgentStats
+    public class CharacterStats
     {
         // ── フィールド ────────────────────────────────────────────────
         // primary_stats の index に対応する整数配列
@@ -17,7 +17,7 @@ namespace AgentSim.Core
         private readonly int[] _primary;
 
         // ── コンストラクタ ────────────────────────────────────────────
-        public AgentStats(int[] primaryValues)
+        public CharacterStats(int[] primaryValues)
         {
             _primary = primaryValues;
         }
@@ -32,7 +32,7 @@ namespace AgentSim.Core
             var defs = SettingsRegistry.Current.Stats;
             for (int i = 0; i < defs.primary_stats.Length; i++)
                 if (defs.primary_stats[i].id == statId) return _primary[i];
-            throw new ArgumentException($"[AgentStats] Unknown primary stat id: '{statId}'");
+            throw new ArgumentException($"[CharacterStats] Unknown primary stat id: '{statId}'");
         }
 
         /// <summary>derived stat を id 文字列で取得（formula を FormulaEvaluator で評価）</summary>
@@ -44,7 +44,7 @@ namespace AgentSim.Core
                 if (d.id == statId)
                     return (int)FormulaEvaluator.Evaluate(d.formula, this, defs);
             }
-            throw new ArgumentException($"[AgentStats] Unknown derived stat id: '{statId}'");
+            throw new ArgumentException($"[CharacterStats] Unknown derived stat id: '{statId}'");
         }
 
         /// <summary>総合戦力（total_power_formula を評価）</summary>
@@ -58,7 +58,7 @@ namespace AgentSim.Core
         /// <summary>
         /// ロール・オリジン・ティアに基づいてランダムなステータスを生成する。
         /// </summary>
-        public static AgentStats Generate(RoleDef role, OriginDef origin, TierDef tier, System.Random rng)
+        public static CharacterStats Generate(RoleDef role, OriginDef origin, TierDef tier, System.Random rng)
         {
             var defs = SettingsRegistry.Current.Stats;
             int statCount = defs.primary_stats.Length;
@@ -89,7 +89,7 @@ namespace AgentSim.Core
                 primary[i] = Math.Max(lo, Math.Min(hi, primary[i]));
             }
 
-            return new AgentStats(primary);
+            return new CharacterStats(primary);
         }
 
         // ── 内部ユーティリティ ────────────────────────────────────────

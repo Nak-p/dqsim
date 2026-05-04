@@ -5,7 +5,7 @@
 //   ① ロスター・案件・進行中ミッションの状態管理
 //   ② パーティ編成と案件への派遣
 //   ③ ミッションの往復ステートマシン（PartyController と連携）
-//   ④ 報酬計算と分配（組織取り分 / エージェント取り分）
+//   ④ 報酬計算と分配（組織取り分 / キャラクター取り分）
 //   ⑤ 定期的な新規案件の自動生成
 //
 // 全パラメータは SettingsRegistry（JSON）から読み込む。
@@ -31,7 +31,7 @@ namespace AgentSim.Core
         /// <summary>組織の累計獲得通貨</summary>
         public int TotalOrgEarned { get; private set; }
 
-        public List<Agent>         Roster             { get; } = new List<Agent>();
+        public List<Character>         Roster             { get; } = new List<Character>();
         public List<Contract>      AvailableContracts { get; } = new List<Contract>();
         public List<ActiveMission> ActiveMissions     { get; } = new List<ActiveMission>();
 
@@ -85,7 +85,7 @@ namespace AgentSim.Core
             GenerateInitialContracts(cfg.initial_contracts);
 
             Debug.Log($"[DispatchManager] 初期化完了: {cfg.organization_name} " +
-                      $"| {cfg.agents_term} {Roster.Count}名 " +
+                      $"| {cfg.characters_term} {Roster.Count}名 " +
                       $"| {cfg.contracts_term} {AvailableContracts.Count}件 " +
                       $"| 初期通貨 {OrgCurrency}{cfg.currency_symbol}");
         }
@@ -120,21 +120,21 @@ namespace AgentSim.Core
         /// party が contract の条件を満たすか検証する。
         /// 条件: 人数範囲・全員 IsAvailable・最低ティア
         /// </summary>
-        public bool CanDispatch(Contract contract, List<Agent> party)
+        public bool CanDispatch(Contract contract, List<Character> party)
         {
             if (party == null || party.Count < contract.MinPartySize) return false;
             if (party.Count > contract.MaxPartySize) return false;
 
             var minTier = contract.MinTier;
 
-            foreach (var agent in party)
+            foreach (var character in party)
             {
-                if (!agent.IsAvailable) return false;
+                if (!character.IsAvailable) return false;
 
                 if (minTier != null)
                 {
-                    var agentTier = SettingsRegistry.Current.GetTier(agent.TierId);
-                    if (agentTier == null || agentTier.index < minTier.index) return false;
+                    var characterTier = SettingsRegistry.Current.GetTier(character.TierId);
+                    if (characterTier == null || characterTier.index < minTier.index) return false;
                 }
             }
             return true;
@@ -145,7 +145,7 @@ namespace AgentSim.Core
         /// contract に party を派遣する。
         /// 成功すれば ActiveMission を返す。失敗なら null。
         /// </summary>
-        public ActiveMission Dispatch(Contract contract, List<Agent> party)
+        public ActiveMission Dispatch(Contract contract, List<Character> party)
         {
             if (!CanDispatch(contract, party))
             {
@@ -163,7 +163,7 @@ namespace AgentSim.Core
 
             // エージェントをロックし、案件を掲示板から除去
             AvailableContracts.Remove(contract);
-            foreach (var agent in party) agent.IsAvailable = false;
+            foreach (var character in party) character.IsAvailable = false;
 
             // PartyController を動的生成
             var go = new GameObject($"Party_{contract.Title}");
@@ -241,7 +241,7 @@ namespace AgentSim.Core
 
             DistributeRewards(mission);
 
-            foreach (var agent in mission.Party) agent.IsAvailable = true;
+            foreach (var character in mission.Party) character.IsAvailable = true;
             ActiveMissions.Remove(mission);
 
             if (mission.PartyController != null)
@@ -279,9 +279,9 @@ namespace AgentSim.Core
 
             // ティアの reward_weight で比例配分
             float totalWeight = 0f;
-            foreach (var agent in party)
+            foreach (var character in party)
             {
-                var tier = SettingsRegistry.Current.GetTier(agent.TierId);
+                var tier = SettingsRegistry.Current.GetTier(character.TierId);
                 totalWeight += tier?.reward_weight ?? 1f;
             }
             if (totalWeight <= 0f) totalWeight = count;
@@ -326,7 +326,7 @@ namespace AgentSim.Core
         private void GenerateRoster(int count)
         {
             for (int i = 0; i < count; i++)
-                Roster.Add(Agent.Generate(_rng));
+                Roster.Add(Character.Generate(_rng));
         }
 
         private void GenerateInitialContracts(int count)

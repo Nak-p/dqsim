@@ -13,9 +13,9 @@ namespace AgentSim.Config
         public string organization_name;        // "Guild" / "NovaTech Operations"
         public string organization_label;       // "Guild Hall" / "Operations Center"
 
-        // エージェント（派遣する人/ユニット）の呼び方
-        public string agent_term;               // "Adventurer" / "Unit"
-        public string agents_term;              // "Adventurers" / "Units"
+        // キャラクター（派遣する人/ユニット）の呼び方
+        public string character_term;               // "Adventurer" / "Unit"  (キャラクター単数)
+        public string characters_term;              // "Adventurers" / "Units" (キャラクター複数)
 
         // 案件（クエスト/ジョブ）の呼び方
         public string contract_term;            // "Quest" / "Job"
@@ -37,7 +37,7 @@ namespace AgentSim.Config
         public int    max_available_contracts;  // 同時掲示最大案件数
         public float  contract_gen_interval_days; // 案件追加間隔（ゲーム内日数）
         public int    max_party_size;           // 1案件の最大パーティ人数
-        public float  agent_travel_speed;       // エージェントの移動速度（タイル/ゲーム時間）
+        public float  character_travel_speed;       // エージェントの移動速度（タイル/ゲーム時間）
 
         // バトル設定
         public int    battle_grid_radius;       // ヘックスグリッド半径 (3 → 37タイル)
