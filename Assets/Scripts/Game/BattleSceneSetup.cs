@@ -4,11 +4,13 @@
 // [ExecuteAlways] により、Inspector でパラメータを変えると即座にグリッドが再描画される。
 // Assets/Scripts/Game/ 配下なので世界観固有コードも許可される。
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using AgentSim.Battle;
 using AgentSim.Config;
 using AgentSim.Core;
+using AgentSim.UI;
 
 namespace AgentSim.Game
 {
@@ -37,7 +39,10 @@ namespace AgentSim.Game
 
         [Header("References")]
         [SerializeField] private Tilemap            hexTilemap;
+        [SerializeField] private Tilemap            highlightTilemap;
         [SerializeField] private BattleUnitRenderer unitRenderer;
+        [SerializeField] private BattleTurnManager  turnManager;
+        [SerializeField] private BattleHudUI        hudUI;
 
         [Header("Test Units")]
         [SerializeField, Range(0, 10)] private int testPartySize  = 3;
@@ -55,7 +60,6 @@ namespace AgentSim.Game
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            // delayCall を使わないと OnValidate 内から Rebuild が呼べない
             UnityEditor.EditorApplication.delayCall += () =>
             {
                 if (this != null && hexTilemap != null)
@@ -74,7 +78,6 @@ namespace AgentSim.Game
                 return;
             }
 
-            // SettingsRegistry をロード（エディタ実行中でも動作）
             if (SettingsRegistry.Current == null)
                 SettingsRegistry.Load(settingId);
 
@@ -97,20 +100,29 @@ namespace AgentSim.Game
                           $"P×{testPartySize} E×{testEnemyCount} seed={seed}");
             }
 
-            // グリッドを Tilemap に描画
             BattleTilemapRenderer.Render(grid, hexTilemap);
 
-            // ユニットをリセットして再配置
             if (unitRenderer != null)
             {
                 unitRenderer.ClearAll();
                 unitRenderer.Initialize(hexTilemap);
-                PlaceTestUnits(grid);
+            }
+
+            if (unitRenderer == null) return;
+
+            var units = PlaceTestUnits(grid);
+
+            // Play モード時のみターン管理を初期化
+            if (Application.isPlaying && turnManager != null && highlightTilemap != null)
+            {
+                turnManager.Initialize(grid, units, highlightTilemap, unitRenderer);
+                if (hudUI != null)
+                    hudUI.Initialize(turnManager);
             }
         }
 
         // ── テストユニット配置 ────────────────────────────────────────
-        private void PlaceTestUnits(BattleGrid grid)
+        private List<BattleUnit> PlaceTestUnits(BattleGrid grid)
         {
             var rng        = new System.Random(seed);
             var leftHexes  = grid.GetLeftSpawnHexes();
@@ -118,13 +130,17 @@ namespace AgentSim.Game
 
             int playerCount = System.Math.Min(testPartySize,  leftHexes.Count);
             int enemyCount  = System.Math.Min(testEnemyCount, rightHexes.Count);
+            var units       = new List<BattleUnit>();
 
             for (int i = 0; i < playerCount; i++)
             {
                 var agent = Agent.Generate(rng);
                 var unit  = new BattleUnit(agent, BattleTeam.Player);
                 if (grid.PlaceUnit(unit, leftHexes[i]))
+                {
                     unitRenderer.PlaceUnit(unit);
+                    units.Add(unit);
+                }
             }
 
             for (int i = 0; i < enemyCount; i++)
@@ -132,8 +148,13 @@ namespace AgentSim.Game
                 var agent = Agent.Generate(rng);
                 var unit  = new BattleUnit(agent, BattleTeam.Enemy);
                 if (grid.PlaceUnit(unit, rightHexes[i]))
+                {
                     unitRenderer.PlaceUnit(unit);
+                    units.Add(unit);
+                }
             }
+
+            return units;
         }
     }
 }
