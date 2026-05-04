@@ -91,7 +91,7 @@ namespace AgentSim.UI
 
             var cfg = SettingsRegistry.Current?.Game;
             string teamLabel = unit.Team == BattleTeam.Player
-                ? (cfg?.character_term  ?? "Player")
+                ? (cfg?.agent_term  ?? "Player")
                 : "Enemy";
 
             int maxTurns = cfg?.battle_max_turns ?? 0;
