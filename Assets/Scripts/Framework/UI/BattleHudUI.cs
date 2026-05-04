@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using AgentSim.Battle;
 using AgentSim.Config;
 
@@ -52,7 +53,8 @@ namespace AgentSim.UI
         // ── 入力 ─────────────────────────────────────────────────────
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.H))
+            var keyboard = Keyboard.current;
+            if (keyboard != null && keyboard.hKey.wasPressedThisFrame)
                 _visible = !_visible;
         }
 

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
 using AgentSim.Config;
 
@@ -76,16 +77,20 @@ namespace AgentSim.Battle
             EnterPhase(PhasePlayerAction);
         }
 
-        // ── Update（マウス入力） ──────────────────────────────────────
+        // ── Update（入力） ────────────────────────────────────────────
         private void Update()
         {
             if (Phase == PhaseIdle || Phase == PhaseEnemyTurn || Phase == PhaseBattleOver)
                 return;
 
-            if (Input.GetMouseButtonDown(0))
+            var mouse    = Mouse.current;
+            var keyboard = Keyboard.current;
+            if (mouse == null || keyboard == null) return;
+
+            if (mouse.leftButton.wasPressedThisFrame)
                 HandleClick();
 
-            if (Input.GetKeyDown(KeyCode.Escape) && Phase == PhasePlayerTarget)
+            if (keyboard.escapeKey.wasPressedThisFrame && Phase == PhasePlayerTarget)
                 CancelTarget();
         }
 
@@ -140,7 +145,8 @@ namespace AgentSim.Battle
         {
             if (_camera == null || _highlightTilemap == null) return;
 
-            var ray = _camera.ScreenPointToRay(Input.mousePosition);
+            var mousePos = Mouse.current.position.ReadValue();
+            var ray = _camera.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0f));
             float dist;
             if (!new Plane(Vector3.forward, Vector3.zero).Raycast(ray, out dist)) return;
 
