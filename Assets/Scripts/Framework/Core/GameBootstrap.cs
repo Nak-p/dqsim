@@ -1,4 +1,4 @@
-// Assets/Scripts/Framework/Core/GameBootstrap.cs
+﻿// Assets/Scripts/Framework/Core/GameBootstrap.cs
 // AgentSim — ゲーム起動エントリポイント
 //
 // シーンの最初の GameObject にアタッチする。
@@ -22,8 +22,9 @@ namespace AgentSim.Core
         [SerializeField] private TimeManager timeManager;
 
         [Header("UI")]
-        [SerializeField] private DispatchManager          dispatchManager;
+        [SerializeField] private DispatchManager           dispatchManager;
         [SerializeField] private CharacterParameterPanelUI paramPanel;
+        [SerializeField] private OrgStatusPanelUI          orgStatusPanel;
 
         // ── Unity ライフサイクル ──────────────────────────────────────
         private void Awake()
@@ -45,6 +46,8 @@ namespace AgentSim.Core
             // UI 初期化（dispatchManager が設定されているときのみ）
             if (paramPanel != null && dispatchManager != null)
                 paramPanel.Initialize(dispatchManager);
+            if (orgStatusPanel != null && dispatchManager != null)
+                orgStatusPanel.Initialize(dispatchManager);
         }
 
         // ── 開発用ユーティリティ ──────────────────────────────────────
@@ -54,6 +57,20 @@ namespace AgentSim.Core
         {
             SettingsRegistry.Load(settingId);
             Debug.Log($"[AgentSim] Settings reloaded: '{settingId}'");
+        }
+
+        [ContextMenu("Switch to adventurer_guild")]
+        private void SwitchToAdventurerGuild()
+        {
+            settingId = "adventurer_guild";
+            ReloadSettings();
+        }
+
+        [ContextMenu("Switch to robot_dispatch")]
+        private void SwitchToRobotDispatch()
+        {
+            settingId = "robot_dispatch";
+            ReloadSettings();
         }
 
         [ContextMenu("Print Config Summary")]
@@ -80,3 +97,6 @@ namespace AgentSim.Core
 #endif
     }
 }
+
+
+

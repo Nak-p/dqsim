@@ -35,6 +35,7 @@ namespace AgentSim.Config
         public TileTypeConfig         TileTypes    { get; private set; }
         public MapConfig              MapSettings  { get; private set; }
         public BattleVisualConfig     BattleVisual { get; private set; }
+        public OrgRankConfig          OrgRanks     { get; private set; }
 
         // ── ロード ──────────────────────────────────────────────────────
         /// <summary>
@@ -59,6 +60,11 @@ namespace AgentSim.Config
             string bvPath = Path.Combine(root, "battle_visual.json");
             if (File.Exists(bvPath))
                 r.BattleVisual = LoadJson<BattleVisualConfig>(root, "battle_visual");
+
+            // オプション: org_ranks.json が存在する場合のみ読み込む
+            string orPath = Path.Combine(root, "org_ranks.json");
+            if (File.Exists(orPath))
+                r.OrgRanks = LoadJson<OrgRankConfig>(root, "org_ranks");
 
             // 配列長の整合性チェック
             r.ValidateArrayLengths();
@@ -161,6 +167,20 @@ namespace AgentSim.Config
             return Tiers.tiers[0];
         }
 
+        /// <summary>
+        /// totalEarned に対応する現在のランクを返す。
+        /// OrgRanks が未定義なら null。
+        /// </summary>
+        public OrgRankDef GetCurrentOrgRank(int totalEarned)
+        {
+            var ranks = OrgRanks?.ranks;
+            if (ranks == null || ranks.Length == 0) return null;
+            OrgRankDef result = ranks[0];
+            foreach (var r in ranks)
+                if (totalEarned >= r.min_earned) result = r;
+            return result;
+        }
+
         /// <summary>id に一致する BattleTileDef を返す（なければ null）</summary>
         public BattleTileDef GetBattleTile(string id)
         {
@@ -171,3 +191,4 @@ namespace AgentSim.Config
         }
     }
 }
+

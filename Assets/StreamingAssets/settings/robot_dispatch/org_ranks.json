@@ -1,0 +1,9 @@
+﻿{
+  "ranks": [
+    { "id": "startup",     "display_name": "Startup",         "min_earned":      0, "scale": 1 },
+    { "id": "operational", "display_name": "Operational",     "min_earned":   3000, "scale": 2 },
+    { "id": "established", "display_name": "Established",     "min_earned":  15000, "scale": 3 },
+    { "id": "major",       "display_name": "Major Corp",      "min_earned":  50000, "scale": 4 },
+    { "id": "dominant",    "display_name": "Industry Leader", "min_earned": 150000, "scale": 5 }
+  ]
+}

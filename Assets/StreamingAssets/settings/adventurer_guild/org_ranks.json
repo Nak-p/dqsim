@@ -1,0 +1,9 @@
+﻿{
+  "ranks": [
+    { "id": "fledgling",  "display_name": "Fledgling Guild",  "min_earned":     0, "scale": 1 },
+    { "id": "known",      "display_name": "Known Guild",      "min_earned":  1000, "scale": 2 },
+    { "id": "respected",  "display_name": "Respected Guild",  "min_earned":  5000, "scale": 3 },
+    { "id": "renowned",   "display_name": "Renowned Guild",   "min_earned": 15000, "scale": 4 },
+    { "id": "legendary",  "display_name": "Legendary Guild",  "min_earned": 40000, "scale": 5 }
+  ]
+}
