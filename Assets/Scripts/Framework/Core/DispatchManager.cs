@@ -84,6 +84,8 @@ namespace AgentSim.Core
             GenerateRoster(cfg.roster_size);
             GenerateInitialContracts(cfg.initial_contracts);
 
+            OnStateChanged?.Invoke();
+
             Debug.Log($"[DispatchManager] 初期化完了: {cfg.organization_name} " +
                       $"| {cfg.characters_term} {Roster.Count}名 " +
                       $"| {cfg.contracts_term} {AvailableContracts.Count}件 " +
