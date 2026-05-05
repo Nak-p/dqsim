@@ -35,17 +35,20 @@ namespace AgentSim.Battle
         // ── 内部状態 ──────────────────────────────────────────────────
         private BattleGrid         _grid;
         private List<BattleUnit>   _allUnits;
-        private Tilemap            _highlightTilemap;
+        private Tilemap            _hexTilemap;        // 座標変換の基準
+        private Tilemap            _highlightTilemap;  // ハイライト書き込み先
         private BattleUnitRenderer _unitRenderer;
         private Camera             _camera;
         private int                _turnIndex;
 
         // ── 初期化 ────────────────────────────────────────────────────
         public void Initialize(BattleGrid grid, List<BattleUnit> allUnits,
-                               Tilemap highlightTilemap, BattleUnitRenderer unitRenderer)
+                               Tilemap hexTilemap, Tilemap highlightTilemap,
+                               BattleUnitRenderer unitRenderer)
         {
             _grid             = grid;
             _allUnits         = allUnits;
+            _hexTilemap       = hexTilemap;
             _highlightTilemap = highlightTilemap;
             _unitRenderer     = unitRenderer;
             _camera           = Camera.main;
@@ -143,14 +146,15 @@ namespace AgentSim.Battle
         // ── マウスクリック処理 ────────────────────────────────────────
         private void HandleClick()
         {
-            if (_camera == null || _highlightTilemap == null) return;
+            if (_camera == null || _hexTilemap == null) return;
 
             var mousePos = Mouse.current.position.ReadValue();
             // 2D 直交投影カメラ: z オフセットでワールド座標を得る
             var worldPos = _camera.ScreenToWorldPoint(
                 new Vector3(mousePos.x, mousePos.y, -_camera.transform.position.z));
-            var cellPos  = _highlightTilemap.WorldToCell(worldPos);
-            var hex      = new HexCoord(cellPos.x, cellPos.y);
+
+            var cellPos = _hexTilemap.WorldToCell(worldPos);
+            var hex     = new HexCoord(cellPos.x, cellPos.y);
 
             if (!_grid.IsInBounds(hex)) return;
 
@@ -263,13 +267,13 @@ namespace AgentSim.Battle
         // ── ハイライト更新 ────────────────────────────────────────────
         private void RefreshHighlights()
         {
-            if (_highlightTilemap == null) return;
+            if (_highlightTilemap == null || _hexTilemap == null) return;
 
             if (Phase == PhasePlayerMove)
             {
                 var reachable = BattleMovement.GetReachable(ActiveUnit, _grid);
                 BattleHighlightRenderer.ShowMoveRange(
-                    reachable, ActiveUnit.Position, _highlightTilemap);
+                    reachable, ActiveUnit.Position, _hexTilemap, _highlightTilemap);
             }
             else if (Phase == PhasePlayerTarget && SelectedAction != null)
             {
@@ -277,7 +281,7 @@ namespace AgentSim.Battle
                     ActiveUnit.Position, SelectedAction.range,
                     _grid, ActiveUnit.Team, SelectedAction.category);
                 BattleHighlightRenderer.ShowActionTargets(
-                    targets, ActiveUnit.Position, _highlightTilemap);
+                    targets, ActiveUnit.Position, _hexTilemap, _highlightTilemap);
             }
             else
             {
@@ -286,4 +290,3 @@ namespace AgentSim.Battle
         }
     }
 }
-

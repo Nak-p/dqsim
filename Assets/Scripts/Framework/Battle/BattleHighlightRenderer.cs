@@ -1,9 +1,8 @@
 ﻿// Assets/Scripts/Framework/Battle/BattleHighlightRenderer.cs
 // AgentSim — バトルハイライトオーバーレイの描画（Unity 依存、静的ユーティリティ）
 //
-// BattleTilemapRenderer と同じ BuildTile パターンを使い、
-// 半透明タイルを別 Tilemap レイヤーに書き込む。
-// 色は BattleVisualConfig (battle_visual.json) から取得する。
+// hexTilemap（メインタイル）のワールド座標を経由してオーバーレイに書き込む。
+// これにより異なる Grid コンポーネント間の座標ずれを完全に回避する。
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,8 +20,11 @@ namespace AgentSim.Battle
             overlay.ClearAllTiles();
         }
 
+        /// <param name="hexTilemap">メイングリッドタイルマップ（座標変換の基準）</param>
+        /// <param name="overlay">ハイライトを書き込む先のタイルマップ</param>
         public static void ShowMoveRange(
-            HashSet<HexCoord> reachable, HexCoord activeHex, Tilemap overlay)
+            HashSet<HexCoord> reachable, HexCoord activeHex,
+            Tilemap hexTilemap, Tilemap overlay)
         {
             overlay.ClearAllTiles();
             var visual = SettingsRegistry.Current?.BattleVisual;
@@ -31,13 +33,16 @@ namespace AgentSim.Battle
             var activeColor = GetColor(visual?.highlight_active_color, new Color(0.9f, 0.85f, 0.2f, 0.65f));
 
             foreach (var hex in reachable)
-                overlay.SetTile(HexToTilemapPos(hex), BuildTile(moveColor));
+                PlaceTile(hex, BuildTile(moveColor), hexTilemap, overlay);
 
-            overlay.SetTile(HexToTilemapPos(activeHex), BuildTile(activeColor));
+            PlaceTile(activeHex, BuildTile(activeColor), hexTilemap, overlay);
         }
 
+        /// <param name="hexTilemap">メイングリッドタイルマップ（座標変換の基準）</param>
+        /// <param name="overlay">ハイライトを書き込む先のタイルマップ</param>
         public static void ShowActionTargets(
-            HashSet<HexCoord> targets, HexCoord activeHex, Tilemap overlay)
+            HashSet<HexCoord> targets, HexCoord activeHex,
+            Tilemap hexTilemap, Tilemap overlay)
         {
             overlay.ClearAllTiles();
             var visual = SettingsRegistry.Current?.BattleVisual;
@@ -46,14 +51,26 @@ namespace AgentSim.Battle
             var activeColor = GetColor(visual?.highlight_active_color, new Color(0.9f, 0.85f, 0.2f, 0.65f));
 
             foreach (var hex in targets)
-                overlay.SetTile(HexToTilemapPos(hex), BuildTile(attackColor));
+                PlaceTile(hex, BuildTile(attackColor), hexTilemap, overlay);
 
-            overlay.SetTile(HexToTilemapPos(activeHex), BuildTile(activeColor));
+            PlaceTile(activeHex, BuildTile(activeColor), hexTilemap, overlay);
         }
 
         // ── 内部ヘルパー ───────────────────────────────────────────────
-        private static Vector3Int HexToTilemapPos(HexCoord hex)
-            => new Vector3Int(hex.Q, hex.R, 0);
+
+        /// <summary>
+        /// hexTilemap 上の HexCoord → ワールド座標 → overlay のセル座標
+        /// という経路でタイルを配置する。
+        /// 2つの Tilemap が異なる Grid にあっても正確に一致する。
+        /// </summary>
+        private static void PlaceTile(
+            HexCoord hex, Tile tile, Tilemap hexTilemap, Tilemap overlay)
+        {
+            var hexCell  = BattleTilemapRenderer.HexToTilemapPos(hex);
+            var worldPos = hexTilemap.GetCellCenterWorld(hexCell);
+            var ovCell   = overlay.WorldToCell(worldPos);
+            overlay.SetTile(ovCell, tile);
+        }
 
         private static Color GetColor(float[] rgba, Color fallback)
         {
