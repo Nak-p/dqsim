@@ -14,7 +14,6 @@ namespace AgentSim.Battle
 {
     public class BattleTurnManager : MonoBehaviour
     {
-        // フェーズ定数（世界観に依存しない内部状態）
         public const string PhaseIdle         = "idle";
         public const string PhasePlayerMove   = "player_move";
         public const string PhasePlayerAction = "player_action";
@@ -35,23 +34,24 @@ namespace AgentSim.Battle
         // ── 内部状態 ──────────────────────────────────────────────────
         private BattleGrid         _grid;
         private List<BattleUnit>   _allUnits;
-        private Tilemap            _hexTilemap;        // 座標変換の基準
-        private Tilemap            _highlightTilemap;  // ハイライト書き込み先
+        private Tilemap            _hexTilemap;
         private BattleUnitRenderer _unitRenderer;
         private Camera             _camera;
         private int                _turnIndex;
 
         // ── 初期化 ────────────────────────────────────────────────────
         public void Initialize(BattleGrid grid, List<BattleUnit> allUnits,
-                               Tilemap hexTilemap, Tilemap highlightTilemap,
-                               BattleUnitRenderer unitRenderer)
+                               Tilemap hexTilemap, BattleUnitRenderer unitRenderer)
         {
-            _grid             = grid;
-            _allUnits         = allUnits;
-            _hexTilemap       = hexTilemap;
-            _highlightTilemap = highlightTilemap;
-            _unitRenderer     = unitRenderer;
-            _camera           = Camera.main;
+            _grid         = grid;
+            _allUnits     = allUnits;
+            _hexTilemap   = hexTilemap;
+            _unitRenderer = unitRenderer;
+            _camera       = Camera.main;
+
+            // ハイライト用 GameObject の親を作成
+            var hlParent = new GameObject("BattleHighlights");
+            BattleHighlightRenderer.SetParent(hlParent.transform);
 
             CurrentTurn = 1;
             BuildTurnOrder();
@@ -59,7 +59,7 @@ namespace AgentSim.Battle
             AdvanceTurn();
         }
 
-        // ── プレイヤー操作（BattleHudUI から呼ぶ） ───────────────────
+        // ── プレイヤー操作 ────────────────────────────────────────────
         public void OnActionSelected(ActionDef action)
         {
             if (Phase != PhasePlayerAction) return;
@@ -103,9 +103,9 @@ namespace AgentSim.Battle
             BuildTurnOrder();
             if (TurnOrder.Count == 0) return;
 
-            _turnIndex = _turnIndex % TurnOrder.Count;
-            ActiveUnit    = TurnOrder[_turnIndex];
-            _turnIndex    = (_turnIndex + 1) % TurnOrder.Count;
+            _turnIndex     = _turnIndex % TurnOrder.Count;
+            ActiveUnit     = TurnOrder[_turnIndex];
+            _turnIndex     = (_turnIndex + 1) % TurnOrder.Count;
             CurrentTurn++;
             SelectedAction = null;
 
@@ -149,7 +149,6 @@ namespace AgentSim.Battle
             if (_camera == null || _hexTilemap == null) return;
 
             var mousePos = Mouse.current.position.ReadValue();
-            // 2D 直交投影カメラ: z オフセットでワールド座標を得る
             var worldPos = _camera.ScreenToWorldPoint(
                 new Vector3(mousePos.x, mousePos.y, -_camera.transform.position.z));
 
@@ -267,13 +266,13 @@ namespace AgentSim.Battle
         // ── ハイライト更新 ────────────────────────────────────────────
         private void RefreshHighlights()
         {
-            if (_highlightTilemap == null || _hexTilemap == null) return;
+            if (_hexTilemap == null) return;
 
             if (Phase == PhasePlayerMove)
             {
                 var reachable = BattleMovement.GetReachable(ActiveUnit, _grid);
                 BattleHighlightRenderer.ShowMoveRange(
-                    reachable, ActiveUnit.Position, _hexTilemap, _highlightTilemap);
+                    reachable, ActiveUnit.Position, _hexTilemap);
             }
             else if (Phase == PhasePlayerTarget && SelectedAction != null)
             {
@@ -281,11 +280,11 @@ namespace AgentSim.Battle
                     ActiveUnit.Position, SelectedAction.range,
                     _grid, ActiveUnit.Team, SelectedAction.category);
                 BattleHighlightRenderer.ShowActionTargets(
-                    targets, ActiveUnit.Position, _hexTilemap, _highlightTilemap);
+                    targets, ActiveUnit.Position, _hexTilemap);
             }
             else
             {
-                BattleHighlightRenderer.Clear(_highlightTilemap);
+                BattleHighlightRenderer.Clear();
             }
         }
     }

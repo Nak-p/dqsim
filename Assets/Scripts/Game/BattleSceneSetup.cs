@@ -115,7 +115,7 @@ namespace AgentSim.Game
             // Play モード時のみターン管理を初期化
             if (Application.isPlaying && turnManager != null && highlightTilemap != null)
             {
-                turnManager.Initialize(grid, units, hexTilemap, highlightTilemap, unitRenderer);
+                turnManager.Initialize(grid, units, hexTilemap, unitRenderer);
                 if (hudUI != null)
                     hudUI.Initialize(turnManager);
             }
@@ -158,4 +158,5 @@ namespace AgentSim.Game
         }
     }
 }
+
 
