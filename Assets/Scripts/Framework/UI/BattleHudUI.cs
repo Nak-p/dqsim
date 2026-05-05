@@ -18,11 +18,11 @@ namespace AgentSim.UI
         [SerializeField] private BattleTurnManager turnManager;
 
         // レイアウト定数（アルゴリズム用ピクセル値、ゲームパラメータではない）
-        private const int PanelW    = 400;
-        private const int PanelH    = 340;
+        private const int PanelW    = 420;
+        private const int PanelH    = 380;
         private const int RowH      = 22;
         private const int BarH      = 14;
-        private const int BtnH      = 26;
+        private const int BtnH      = 28;
         private const int Padding   = 8;
 
         private bool     _visible   = true;
@@ -35,6 +35,17 @@ namespace AgentSim.UI
         private static Texture2D TexWhite => _texWhite ??= MakeTex(Color.white);
         private static Texture2D TexDark  => _texDark  ??= MakeTex(new Color(0.15f, 0.15f, 0.15f));
 
+        // フェーズ表示名（世界観非依存の機能ラベル）
+        private static readonly System.Collections.Generic.Dictionary<string, string> _phaseLabel =
+            new System.Collections.Generic.Dictionary<string, string>
+            {
+                { BattleTurnManager.PhasePlayerMove,   "MOVE  ─ click destination / click self to skip" },
+                { BattleTurnManager.PhasePlayerAction, "ACTION  ─ choose an action or End Turn" },
+                { BattleTurnManager.PhasePlayerTarget, "TARGET  ─ click enemy / Esc to cancel" },
+                { BattleTurnManager.PhaseEnemyTurn,    "ENEMY TURN …" },
+                { BattleTurnManager.PhaseBattleOver,   "" },
+            };
+
         // ── 初期化 ────────────────────────────────────────────────────
         public void Initialize(BattleTurnManager tm)
         {
@@ -42,7 +53,7 @@ namespace AgentSim.UI
             turnManager.OnStateChanged += Repaint;
         }
 
-        private void Repaint() { }  // OnStateChanged で GUI を更新させるだけ
+        private void Repaint() { }
 
         private void OnDestroy()
         {
@@ -73,6 +84,7 @@ namespace AgentSim.UI
                                          PanelW - Padding * 2, PanelH - Padding * 2));
 
             DrawActiveUnit();
+            DrawPhaseLabel();
 
             if (turnManager.Phase == BattleTurnManager.PhasePlayerAction)
                 DrawActionButtons();
@@ -92,15 +104,23 @@ namespace AgentSim.UI
             if (unit == null) return;
 
             var cfg = SettingsRegistry.Current?.Game;
-            string teamLabel = unit.Team == BattleTeam.Player
-                ? (cfg?.agent_term  ?? "Player")
+            bool isPlayer = unit.Team == BattleTeam.Player;
+            string teamLabel = isPlayer
+                ? (cfg?.agent_term ?? "Player")
                 : "Enemy";
 
             int maxTurns = cfg?.battle_max_turns ?? 0;
-            GUILayout.Label($"[{unit.AgentName}]  Turn {turnManager.CurrentTurn - 1} / {maxTurns}");
-            GUILayout.Label(teamLabel);
 
-            GUILayout.Space(2);
+            // ユニット名を大きく強調表示
+            var prevColor = GUI.color;
+            GUI.color = isPlayer ? new Color(0.4f, 1f, 0.5f) : new Color(1f, 0.5f, 0.4f);
+            GUILayout.Label($"▶  {unit.AgentName}  [{teamLabel}]", GetHeaderStyle());
+            GUI.color = prevColor;
+
+            GUILayout.Label($"Turn {turnManager.CurrentTurn - 1} / {maxTurns}",
+                            GetSmallStyle());
+
+            GUILayout.Space(4);
             DrawBar(unit.CurrentHp / (float)unit.MaxHp,
                     $"HP  {unit.CurrentHp} / {unit.MaxHp}",
                     new Color(0.2f, 0.8f, 0.3f));
@@ -108,6 +128,25 @@ namespace AgentSim.UI
             DrawBar(unit.CurrentAp / unit.MaxAp,
                     $"AP  {unit.CurrentAp:F1} / {unit.MaxAp:F1}",
                     new Color(0.3f, 0.6f, 1.0f));
+
+            GUILayout.Space(2);
+        }
+
+        // ── フェーズラベル ────────────────────────────────────────────
+        private void DrawPhaseLabel()
+        {
+            string phase = turnManager.Phase;
+            if (!_phaseLabel.TryGetValue(phase, out string label)) return;
+            if (string.IsNullOrEmpty(label)) return;
+
+            bool isPlayerPhase = phase == BattleTurnManager.PhasePlayerMove
+                              || phase == BattleTurnManager.PhasePlayerAction
+                              || phase == BattleTurnManager.PhasePlayerTarget;
+
+            var prevColor = GUI.color;
+            GUI.color = isPlayerPhase ? new Color(1f, 0.95f, 0.5f) : new Color(0.7f, 0.7f, 0.7f);
+            GUILayout.Label(label, GetSmallStyle());
+            GUI.color = prevColor;
 
             GUILayout.Space(4);
         }
@@ -156,12 +195,14 @@ namespace AgentSim.UI
                 if (!u.IsAlive) continue;
                 bool active = u == turnManager.ActiveUnit;
                 string team = u.Team == BattleTeam.Player ? "P" : "E";
-                string label = $"{(active ? "> " : "  ")}{u.AgentName} [{team}]  {u.CurrentHp}/{u.MaxHp}";
+                string label = $"{(active ? "▶ " : "  ")}{u.AgentName} [{team}]  {u.CurrentHp}/{u.MaxHp}";
 
                 if (active)
                 {
                     var prev = GUI.color;
-                    GUI.color = new Color(1f, 0.9f, 0.4f);
+                    GUI.color = u.Team == BattleTeam.Player
+                        ? new Color(0.4f, 1f, 0.5f)
+                        : new Color(1f, 0.5f, 0.4f);
                     GUILayout.Label(label, GUILayout.Height(RowH));
                     GUI.color = prev;
                 }
@@ -177,7 +218,7 @@ namespace AgentSim.UI
         // ── バトル終了オーバーレイ ────────────────────────────────────
         private void DrawBattleOverOverlay()
         {
-            GUILayout.EndArea();  // 一度 EndArea して中央に描画
+            GUILayout.EndArea();
 
             float ow = 260, oh = 100;
             float ox = (Screen.width  - ow) * 0.5f;
@@ -195,7 +236,6 @@ namespace AgentSim.UI
 
             GUILayout.EndArea();
 
-            // パネル領域を再開（EndArea と対になる BeginArea の代替）
             GUILayout.BeginArea(new Rect(0, 0, 0, 0));
         }
 
@@ -215,15 +255,33 @@ namespace AgentSim.UI
             GUILayout.Space(2);
         }
 
+        // ── スタイルヘルパー ──────────────────────────────────────────
+        private static GUIStyle GetHeaderStyle()
+        {
+            return new GUIStyle(GUI.skin.label)
+            {
+                fontSize  = 15,
+                fontStyle = FontStyle.Bold
+            };
+        }
+
+        private static GUIStyle GetSmallStyle()
+        {
+            return new GUIStyle(GUI.skin.label)
+            {
+                fontSize  = 11,
+                fontStyle = FontStyle.Normal
+            };
+        }
+
         private static GUIStyle GetCenteredLabelStyle()
         {
-            var style = new GUIStyle(GUI.skin.label)
+            return new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontSize   = 20,
                 fontStyle  = FontStyle.Bold
             };
-            return style;
         }
 
         private static Texture2D MakeTex(Color c)
