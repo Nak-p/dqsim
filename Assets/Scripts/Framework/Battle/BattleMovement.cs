@@ -124,9 +124,8 @@ namespace AgentSim.Battle
 
         // ── アクション対象計算 ────────────────────────────────────────
         /// <summary>
-        /// origin から range マス以内にいる対象ユニットのマスを返す。
+        /// origin から range マス以内にいる対象ユニットのマスを返す（ユニット在籍が条件）。
         /// "melee"/"ranged" → 敵ユニット、"support" → 味方ユニット。
-        /// アクション対象は向きに関係なく全方向。
         /// </summary>
         public static HashSet<HexCoord> GetActionTargets(
             HexCoord origin, int range, BattleGrid grid,
@@ -146,6 +145,23 @@ namespace AgentSim.Battle
                 var unit = grid.GetUnit(hex);
                 if (unit != null && unit.IsAlive && unit.Team == targetTeam)
                     result.Add(hex);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// origin から range マス以内のグリッド内全マスを返す（ユニット在籍不問）。
+        /// ハイライト表示用。origin 自身は除く。
+        /// </summary>
+        public static HashSet<HexCoord> GetActionRangeHexes(
+            HexCoord origin, int range, BattleGrid grid)
+        {
+            var result = new HashSet<HexCoord>();
+            foreach (var hex in origin.WithinRange(range))
+            {
+                if (hex.Equals(origin))    continue;
+                if (!grid.IsInBounds(hex)) continue;
+                result.Add(hex);
             }
             return result;
         }

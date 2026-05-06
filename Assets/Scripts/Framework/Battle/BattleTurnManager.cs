@@ -322,11 +322,15 @@ namespace AgentSim.Battle
             }
             else if (Phase == PhasePlayerTarget && SelectedAction != null)
             {
-                var targets = BattleMovement.GetActionTargets(
+                // 射程内の全マス（ユニット在不在問わず）
+                var rangeHexes = BattleMovement.GetActionRangeHexes(
+                    ActiveUnit.Position, SelectedAction.range, _grid);
+                // 実際に攻撃できるマス（ユニット在籍）
+                var validTargets = BattleMovement.GetActionTargets(
                     ActiveUnit.Position, SelectedAction.range,
                     _grid, ActiveUnit.Team, SelectedAction.category);
                 BattleHighlightRenderer.ShowActionTargets(
-                    targets, ActiveUnit.Position, _hexTilemap);
+                    rangeHexes, validTargets, ActiveUnit.Position, _hexTilemap);
             }
             else
             {
@@ -352,3 +356,4 @@ namespace AgentSim.Battle
         }
     }
 }
+
