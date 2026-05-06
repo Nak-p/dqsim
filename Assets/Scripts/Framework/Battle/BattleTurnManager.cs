@@ -178,7 +178,7 @@ namespace AgentSim.Battle
             int steps    = HexCoord.Distance(ActiveUnit.Position, hex);
 
             _grid.MoveUnit(ActiveUnit, hex);
-            _unitRenderer.MoveUnit(ActiveUnit, hex);
+            _unitRenderer.MoveUnitSmooth(ActiveUnit, hex);  // アニメーション開始（待機なし）
             ActiveUnit.SpendAp(apCost * steps);
 
             EnterPhase(PhasePlayerAction);
@@ -244,7 +244,8 @@ namespace AgentSim.Battle
                 int steps    = HexCoord.Distance(enemy.Position, to);
 
                 _grid.MoveUnit(enemy, to);
-                _unitRenderer.MoveUnit(enemy, to);
+                var moveAnim = _unitRenderer.MoveUnitSmooth(enemy, to);
+                if (moveAnim != null) yield return moveAnim;  // アニメーション完了まで待機
                 enemy.SpendAp(apCost * steps);
 
                 OnStateChanged?.Invoke();
@@ -289,3 +290,4 @@ namespace AgentSim.Battle
         }
     }
 }
+

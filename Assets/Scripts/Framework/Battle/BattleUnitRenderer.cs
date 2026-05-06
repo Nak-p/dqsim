@@ -1,10 +1,7 @@
 ﻿// Assets/Scripts/Framework/Battle/BattleUnitRenderer.cs
 // AgentSim — バトルグリッド上のユニットアイコン描画 MonoBehaviour
-//
-// ユニット色は BattleVisualConfig (battle_visual.json) から読み込む。
-// C# に色定数をハードコーディングしてはいけない。
-// アイコン生成アルゴリズム（形状・サイズ）は視覚定数として許可される。
 
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -14,12 +11,11 @@ namespace AgentSim.Battle
 {
     public class BattleUnitRenderer : MonoBehaviour
     {
-        // ── 内部状態 ──────────────────────────────────────────────────
         private Tilemap                        _tilemap;
-        private Dictionary<string, GameObject> _unitObjects; // AgentId → GameObject
+        private Dictionary<string, GameObject> _unitObjects;
 
-        // アイコンサイズ（ピクセル）— アルゴリズム定数
-        private const int IconSize = 12;
+        private const int   IconSize     = 12;
+        private const float MoveDuration = 0.28f;   // 移動アニメーション秒数
 
         // ── 初期化 ────────────────────────────────────────────────────
         public void Initialize(Tilemap tilemap)
@@ -28,13 +24,8 @@ namespace AgentSim.Battle
             _unitObjects = new Dictionary<string, GameObject>();
         }
 
-        /// <summary>
-        /// 全ユニットアイコンを削除してリセットする。Rebuild 時に呼ぶ。
-        /// 辞書に加え、ドメインリロード等で孤立した子 GameObject も一掃する。
-        /// </summary>
         public void ClearAll()
         {
-            // 辞書経由で削除
             if (_unitObjects != null)
             {
                 foreach (var go in _unitObjects.Values)
@@ -42,7 +33,6 @@ namespace AgentSim.Battle
                 _unitObjects.Clear();
             }
 
-            // ドメインリロード等で辞書と乖離した孤立 GameObject も一掃
             for (int i = transform.childCount - 1; i >= 0; i--)
             {
                 var child = transform.GetChild(i);
@@ -51,7 +41,6 @@ namespace AgentSim.Battle
         }
 
         // ── ユニット操作 ──────────────────────────────────────────────
-        /// <summary>ユニットのアイコンをグリッド上に配置する。</summary>
         public void PlaceUnit(BattleUnit unit)
         {
             if (_unitObjects == null) _unitObjects = new Dictionary<string, GameObject>();
@@ -72,14 +61,45 @@ namespace AgentSim.Battle
             _unitObjects[unit.AgentId] = go;
         }
 
-        /// <summary>ユニットアイコンを新しいタイルへ移動する。</summary>
+        /// <summary>
+        /// 即時移動（瞬間テレポート）。
+        /// </summary>
         public void MoveUnit(BattleUnit unit, HexCoord to)
         {
             if (_unitObjects == null || !_unitObjects.TryGetValue(unit.AgentId, out var go)) return;
             go.transform.position = GetWorldPos(to);
         }
 
-        /// <summary>ユニットアイコンを削除する。</summary>
+        /// <summary>
+        /// スムーズ移動アニメーション。コルーチンを返す。
+        /// BattleTurnManager で yield return して完了を待てる。
+        /// </summary>
+        public Coroutine MoveUnitSmooth(BattleUnit unit, HexCoord to)
+        {
+            if (_unitObjects == null || !_unitObjects.TryGetValue(unit.AgentId, out var go))
+                return null;
+
+            var from = go.transform.position;
+            var dest = GetWorldPos(to);
+
+            return StartCoroutine(AnimateMove(go.transform, from, dest, MoveDuration));
+        }
+
+        private IEnumerator AnimateMove(Transform t, Vector3 from, Vector3 dest, float duration)
+        {
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float ratio  = Mathf.Clamp01(elapsed / duration);
+                // SmoothStep で加速→減速のイージング
+                float smooth = ratio * ratio * (3f - 2f * ratio);
+                t.position   = Vector3.Lerp(from, dest, smooth);
+                yield return null;
+            }
+            t.position = dest;
+        }
+
         public void RemoveUnit(BattleUnit unit)
         {
             if (_unitObjects == null || !_unitObjects.TryGetValue(unit.AgentId, out var go)) return;
@@ -108,7 +128,6 @@ namespace AgentSim.Battle
                     (byte)(raw[2] * 255),
                     (byte)(raw[3] * 255));
 
-            // フォールバック
             return team == BattleTeam.Player
                 ? new Color32(0x60, 0xa0, 0xff, 0xff)
                 : new Color32(0xff, 0x60, 0x60, 0xff);
