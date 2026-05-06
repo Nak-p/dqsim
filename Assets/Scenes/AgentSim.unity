@@ -233,6 +233,7 @@ GameObject:
   m_Component:
   - component: {fileID: 100000002}
   - component: {fileID: 100000003}
+  - component: {fileID: 100000004}
   m_Layer: 0
   m_Name: Bootstrap
   m_TagString: Untagged
@@ -267,8 +268,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e756513d36d61d458817e31502b3aef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AgentSim.Core.GameBootstrap
-  settingId: adventurer_guild
+  settingId: adventurer_dispatch
   timeManager: {fileID: 0}
+  dispatchManager: {fileID: 0}
+  paramPanel: {fileID: 0}
+  orgStatusPanel: {fileID: 0}
+--- !u!114 &100000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51bed8e42c0c5584998ef5b7f048e09a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AgentSim.UI.OrgStatusPanelUI
+  dispatchManager: {fileID: 0}
 --- !u!1 &136754619
 GameObject:
   m_ObjectHideFlags: 0
@@ -570,6 +587,127 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!1 &319215345
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 319215346}
+  m_Layer: 0
+  m_Name: OrgStatusPanelUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &319215346
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319215345}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.62874, y: -4.47531, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &390813672
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 390813674}
+  - component: {fileID: 390813673}
+  m_Layer: 0
+  m_Name: ContractBoard
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &390813673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390813672}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4593114820a0de41af9da19e023896b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AgentSim.UI.ContractBoardUI
+  dispatchManager: {fileID: 0}
+--- !u!4 &390813674
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390813672}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.62874, y: -4.47531, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1253237095
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1253237097}
+  - component: {fileID: 1253237096}
+  m_Layer: 0
+  m_Name: UIPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1253237096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1253237095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6935db05b1dac0b4fba8411e8b0baf00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AgentSim.UI.CharacterParameterPanelUI
+  dispatchManager: {fileID: 0}
+--- !u!4 &1253237097
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1253237095}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.62874, y: -4.47531, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1677661676
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,3 +843,6 @@ SceneRoots:
   - {fileID: 200000002}
   - {fileID: 210755548}
   - {fileID: 37271259}
+  - {fileID: 1253237097}
+  - {fileID: 390813674}
+  - {fileID: 319215346}
