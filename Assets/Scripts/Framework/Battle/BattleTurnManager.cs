@@ -80,6 +80,28 @@ namespace AgentSim.Battle
             EnterPhase(PhasePlayerAction);
         }
 
+        /// <summary>
+        /// 指定方向に向きを変える。後方3方向への転換は AP 1 を消費する。
+        /// AP が不足している場合は転換しない。
+        /// </summary>
+        public void TryChangeFacing(int dirIndex)
+        {
+            if (ActiveUnit == null) return;
+            if (dirIndex == ActiveUnit.Facing) return;
+
+            bool isFront = BattleMovement.IsFrontDirection(ActiveUnit.Facing, dirIndex);
+            if (!isFront)
+            {
+                float rearPen = SettingsRegistry.Current.Game.battle_rear_ap_penalty;
+                if (ActiveUnit.CurrentAp < rearPen) return;
+                ActiveUnit.SpendAp(rearPen);
+            }
+
+            ActiveUnit.Facing = dirIndex;
+            RefreshHighlights();
+            OnStateChanged?.Invoke();
+        }
+
         // ── Update（入力） ────────────────────────────────────────────
         private void Update()
         {
@@ -151,6 +173,18 @@ namespace AgentSim.Battle
             var mousePos = Mouse.current.position.ReadValue();
             var worldPos = _camera.ScreenToWorldPoint(
                 new Vector3(mousePos.x, mousePos.y, -_camera.transform.position.z));
+            worldPos.z = 0f;
+
+            // ── 移動フェーズ中: 方向三角形クリックを最優先チェック ──
+            if (Phase == PhasePlayerMove && ActiveUnit != null)
+            {
+                if (BattleHighlightRenderer.TryGetClickedDirection(
+                        worldPos, _hexTilemap, ActiveUnit.Position, out int dirIdx))
+                {
+                    TryChangeFacing(dirIdx);
+                    return;
+                }
+            }
 
             var cellPos = _hexTilemap.WorldToCell(worldPos);
             var hex     = new HexCoord(cellPos.x, cellPos.y);
@@ -278,13 +312,13 @@ namespace AgentSim.Battle
             if (Phase == PhasePlayerMove)
             {
                 var (front, rear) = BattleMovement.GetReachableSplit(ActiveUnit, _grid);
-                var allReachable  = new System.Collections.Generic.HashSet<HexCoord>(front);
-                allReachable.UnionWith(rear);
 
-                var attackHexes = ComputeAttackRange(ActiveUnit, allReachable);
+                // 攻撃可能エリア: 現在地のみから計算（移動先は含まない）
+                var attackHexes = ComputeAttackRangeFromCurrentPos(ActiveUnit);
 
                 BattleHighlightRenderer.ShowMoveRange(
-                    front, rear, attackHexes, ActiveUnit.Position, _hexTilemap);
+                    front, rear, attackHexes, ActiveUnit.Position,
+                    ActiveUnit.Facing, _hexTilemap);
             }
             else if (Phase == PhasePlayerTarget && SelectedAction != null)
             {
@@ -301,32 +335,20 @@ namespace AgentSim.Battle
         }
 
         /// <summary>
-        /// 現在地 + 到達可能マスすべてから攻撃できる敵マスを収集する。
-        /// AP 残量を厳密に見ず「移動後に攻撃可能かどうか」の視覚ヒントとして使用。
+        /// 現在地のみから攻撃できる敵マスを収集する。
         /// </summary>
-        private System.Collections.Generic.HashSet<HexCoord> ComputeAttackRange(
-            BattleUnit unit,
-            System.Collections.Generic.HashSet<HexCoord> reachable)
+        private System.Collections.Generic.HashSet<HexCoord> ComputeAttackRangeFromCurrentPos(
+            BattleUnit unit)
         {
             var result  = new System.Collections.Generic.HashSet<HexCoord>();
             var actions = SettingsRegistry.Current?.Actions?.actions;
             if (actions == null) return result;
 
-            // 現在地からの攻撃範囲
             foreach (var action in actions)
                 result.UnionWith(BattleMovement.GetActionTargets(
                     unit.Position, action.range, _grid, unit.Team, action.category));
-
-            // 移動後の各マスからの攻撃範囲
-            foreach (var hex in reachable)
-                foreach (var action in actions)
-                    result.UnionWith(BattleMovement.GetActionTargets(
-                        hex, action.range, _grid, unit.Team, action.category));
 
             return result;
         }
     }
 }
-
-
-
