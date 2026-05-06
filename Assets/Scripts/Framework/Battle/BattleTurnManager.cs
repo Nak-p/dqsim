@@ -278,8 +278,13 @@ namespace AgentSim.Battle
             if (Phase == PhasePlayerMove)
             {
                 var (front, rear) = BattleMovement.GetReachableSplit(ActiveUnit, _grid);
+                var allReachable  = new System.Collections.Generic.HashSet<HexCoord>(front);
+                allReachable.UnionWith(rear);
+
+                var attackHexes = ComputeAttackRange(ActiveUnit, allReachable);
+
                 BattleHighlightRenderer.ShowMoveRange(
-                    front, rear, ActiveUnit.Position, ActiveUnit.Facing, _hexTilemap);
+                    front, rear, attackHexes, ActiveUnit.Position, _hexTilemap);
             }
             else if (Phase == PhasePlayerTarget && SelectedAction != null)
             {
@@ -294,7 +299,34 @@ namespace AgentSim.Battle
                 BattleHighlightRenderer.Clear();
             }
         }
+
+        /// <summary>
+        /// 現在地 + 到達可能マスすべてから攻撃できる敵マスを収集する。
+        /// AP 残量を厳密に見ず「移動後に攻撃可能かどうか」の視覚ヒントとして使用。
+        /// </summary>
+        private System.Collections.Generic.HashSet<HexCoord> ComputeAttackRange(
+            BattleUnit unit,
+            System.Collections.Generic.HashSet<HexCoord> reachable)
+        {
+            var result  = new System.Collections.Generic.HashSet<HexCoord>();
+            var actions = SettingsRegistry.Current?.Actions?.actions;
+            if (actions == null) return result;
+
+            // 現在地からの攻撃範囲
+            foreach (var action in actions)
+                result.UnionWith(BattleMovement.GetActionTargets(
+                    unit.Position, action.range, _grid, unit.Team, action.category));
+
+            // 移動後の各マスからの攻撃範囲
+            foreach (var hex in reachable)
+                foreach (var action in actions)
+                    result.UnionWith(BattleMovement.GetActionTargets(
+                        hex, action.range, _grid, unit.Team, action.category));
+
+            return result;
+        }
     }
 }
+
 
 
