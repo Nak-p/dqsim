@@ -79,18 +79,15 @@ namespace AgentSim.Battle
             Clear();
             var visual = SettingsRegistry.Current?.BattleVisual;
 
-            // 射程内の全マスを薄赤、実際に攻撃できるマスを濃赤
-            var rangeColor  = new Color(0.90f, 0.15f, 0.10f, 0.35f);
+            var rangeColor  = new Color(0.90f, 0.15f, 0.10f, 0.35f);   // 射程内空マス（薄赤）
             var targetColor = GetColor(visual?.highlight_attack_color,
-                                       new Color(0.95f, 0.20f, 0.10f, 0.70f));
+                                       new Color(0.95f, 0.20f, 0.10f, 0.70f)); // 攻撃可能マス（濃赤）
             var activeColor = GetColor(visual?.highlight_active_color,
                                        new Color(0.90f, 0.85f, 0.20f, 0.70f));
 
-            // 射程内の全マス（薄赤）
             foreach (var hex in rangeHexes)
                 Spawn(hex, rangeColor, hexTilemap, 3);
 
-            // 実際のターゲットマス（濃赤・上に重ねる）
             foreach (var hex in validTargets)
                 Spawn(hex, targetColor, hexTilemap, 4);
 
@@ -107,37 +104,33 @@ namespace AgentSim.Battle
             var centerWorld = hexTilemap.GetCellCenterWorld(centerCell);
             centerWorld.z = 0f;
 
-            var cellSize = hexTilemap.layoutGrid.cellSize;
-            // タイル間距離の目安（六角形のセンター間距離）
-            float tileSpan = (cellSize.x + cellSize.y) * 0.5f;
-
             var dirs = HexCoord.AllDirections;
 
             for (int d = 0; d < dirs.Length; d++)
             {
                 bool isFront = BattleMovement.IsFrontDirection(facing, d);
 
-                // 隣接セル中心のワールド座標
+                // 隣接セルのワールド座標（GetCellCenterWorld で正確な位置を取得）
                 var nbHex   = new HexCoord(activeHex.Q + dirs[d].Q, activeHex.R + dirs[d].R);
                 var nbCell  = BattleTilemapRenderer.HexToTilemapPos(nbHex);
                 var nbWorld = hexTilemap.GetCellCenterWorld(nbCell);
-                nbWorld.z = 0f;
+                nbWorld.z   = 0f;
 
-                // 方向ベクトルと中間点
-                var dir     = nbWorld - centerWorld;
-                float dist  = dir.magnitude;
-                var  dirN   = dir / dist;
+                // 実際の隣接距離（tileSpan 計算の代わりに実測値を使用）
+                var diffVec = nbWorld - centerWorld;
+                float interHexDist = diffVec.magnitude;
+                if (interHexDist < 0.001f) continue;   // 距離ゼロガード
+                var  dirN = diffVec / interHexDist;
 
-                // 三角形を中心 → 隣接 の 60% の位置に配置（ユニット側に寄せる）
-                var arrowPos = centerWorld + dirN * dist * 0.55f;
+                // 三角形を中心 → 隣接 の 42% 位置に配置（ユニットのセル内に収める）
+                var arrowPos = centerWorld + dirN * interHexDist * 0.42f;
 
                 // 色（前方=緑 / 後方=黄）
                 var color = isFront
                     ? new Color(0.10f, 0.90f, 0.25f, 0.90f)
                     : new Color(0.95f, 0.85f, 0.05f, 0.90f);
 
-                // 頂点が隣接方向を指すようにする
-                // atan2 は +X 基準なので、そのまま rotation に使える
+                // 隣接マスへのワールド角度で回転
                 float angleDeg = Mathf.Atan2(dirN.y, dirN.x) * Mathf.Rad2Deg;
 
                 var go = new GameObject($"DirArrow_{d}");
@@ -145,10 +138,10 @@ namespace AgentSim.Battle
                 go.transform.position = arrowPos;
                 go.transform.rotation = Quaternion.Euler(0f, 0f, angleDeg);
 
-                // スケール: タイル間距離の 30% × 25%
-                float w = tileSpan * 0.30f;
-                float h = tileSpan * 0.25f;
-                go.transform.localScale = new Vector3(w, h, 1f);
+                // スケール: 実測隣接距離の 22% × 18% (正方形に近いスケールで歪み防止)
+                float arrowW = interHexDist * 0.22f;
+                float arrowH = interHexDist * 0.18f;
+                go.transform.localScale = new Vector3(arrowW, arrowH, 1f);
 
                 var sr          = go.AddComponent<SpriteRenderer>();
                 sr.sprite       = BuildTriangleSprite(color);
@@ -156,7 +149,7 @@ namespace AgentSim.Battle
 
                 _pool.Add(go);
 
-                // クリック判定用位置（配置位置を記録）
+                // クリック判定用（配置位置を記録）
                 _dirArrowPositions[d] = arrowPos;
             }
         }
@@ -170,17 +163,28 @@ namespace AgentSim.Battle
             dirIndex = -1;
             if (_dirArrowPositions.Count == 0) return false;
 
-            var cellSize = hexTilemap.layoutGrid.cellSize;
-            float tileSpan = (cellSize.x + cellSize.y) * 0.5f;
-            float hitR = tileSpan * 0.30f; // タイル間距離の 30% をヒット半径とする
+            var centerCell  = BattleTilemapRenderer.HexToTilemapPos(activeHex);
+            var centerWorld = hexTilemap.GetCellCenterWorld(centerCell);
+            centerWorld.z = 0f;
+
+            // 隣接距離を実測（d=0 の隣接セルを使う）
+            var dirs = HexCoord.AllDirections;
+            var nb0   = new HexCoord(activeHex.Q + dirs[0].Q, activeHex.R + dirs[0].R);
+            var nb0W  = hexTilemap.GetCellCenterWorld(
+                            BattleTilemapRenderer.HexToTilemapPos(nb0));
+            nb0W.z = 0f;
+            float interHexDist = Mathf.Max((nb0W - centerWorld).magnitude, 0.01f);
+
+            // ヒット半径 = 隣接距離の 28%
+            float hitR = interHexDist * 0.28f;
 
             float best = float.MaxValue;
             foreach (var kv in _dirArrowPositions)
             {
-                float d = Vector3.Distance(worldPos, kv.Value);
-                if (d < hitR && d < best)
+                float dist = Vector3.Distance(worldPos, kv.Value);
+                if (dist < hitR && dist < best)
                 {
-                    best = d;
+                    best = dist;
                     dirIndex = kv.Key;
                 }
             }
@@ -266,11 +270,7 @@ namespace AgentSim.Battle
             return Mathf.Max(a, Mathf.Max(b, c));
         }
 
-        /// <summary>
-        /// 頂点が +X 方向を向く三角形スプライト。
-        /// SpriteRenderer の rotation で向きを合わせる。
-        /// pivot = (0.5, 0.5) = テクスチャ中央。
-        /// </summary>
+        /// <summary>頂点が +X 方向を向く三角形スプライト。pivot = (0.5, 0.5)。</summary>
         private static Sprite BuildTriangleSprite(Color color)
         {
             var pixels = DrawTriangle(TexSize, color);
@@ -278,52 +278,43 @@ namespace AgentSim.Battle
                          { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
             tex.SetPixels(pixels);
             tex.Apply();
-            // pivot をテクスチャ中央に設定（localScale で大きさ調整）
             return Sprite.Create(tex,
                 new Rect(0, 0, TexSize, TexSize),
                 new Vector2(0.5f, 0.5f), TexSize);
         }
 
         /// <summary>
-        /// 頂点が右（+X）にある等辺三角形を描画。
-        ///   px = -apex : 底辺（左端、幅が最大）
-        ///   px = +apex : 頂点（右端、幅ゼロ）
+        /// 頂点が右（+X）の等辺三角形。
+        /// apex(+0.78) = 右頂点、-apex = 左底辺。
         /// </summary>
         private static Color[] DrawTriangle(int size, Color fill)
         {
             var pixels = new Color[size * size];
             float cx = size * 0.5f, cy = size * 0.5f;
-            const float apex  = 0.78f;  // 頂点の x 座標（+X 側）
-            const float soft  = 0.06f;  // ソフトエッジ幅
+            const float apex = 0.78f;
+            const float soft = 0.06f;
 
             for (int y = 0; y < size; y++)
             for (int x = 0; x < size; x++)
             {
-                // 正規化座標 [-1, 1]
                 float px = (x + 0.5f - cx) / (size * 0.5f);
                 float py = (y + 0.5f - cy) / (size * 0.5f);
 
-                // 右向き三角形: 頂点が +apex、底辺が -apex
-                // |py| < (apex - px) / (2 * apex) * height
                 float halfH = (apex - px) / (2f * apex) * 0.88f;
-
                 float absPy = Mathf.Abs(py);
                 float edge  = halfH - absPy;
 
                 Color c;
                 if (px > apex || px < -apex || halfH <= 0f)
-                {
                     c = Color.clear;
-                }
                 else if (edge < soft)
                 {
                     float alpha = Mathf.Clamp01(edge / soft);
                     c = new Color(fill.r, fill.g, fill.b, fill.a * alpha);
                 }
                 else
-                {
                     c = fill;
-                }
+
                 pixels[y * size + x] = c;
             }
             return pixels;

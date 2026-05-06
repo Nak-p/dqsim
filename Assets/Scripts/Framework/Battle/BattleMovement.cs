@@ -150,20 +150,35 @@ namespace AgentSim.Battle
         }
 
         /// <summary>
-        /// origin から range マス以内のグリッド内全マスを返す（ユニット在籍不問）。
-        /// ハイライト表示用。origin 自身は除く。
+        /// origin から range マス以内のグリッド内全マスを返す（ハイライト表示用）。
+        /// origin 自身と actorTeam の味方ユニットが占有するマスは除外する。
+        /// category == "support" の場合は敵マスを除外し、味方マスを含める。
         /// </summary>
         public static HashSet<HexCoord> GetActionRangeHexes(
-            HexCoord origin, int range, BattleGrid grid)
+            HexCoord origin, int range, BattleGrid grid,
+            BattleTeam actorTeam, string category)
         {
+            bool targetEnemy = category != "support";
+            BattleTeam allyTeam = actorTeam;
+
             var result = new HashSet<HexCoord>();
             foreach (var hex in origin.WithinRange(range))
             {
                 if (hex.Equals(origin))    continue;
                 if (!grid.IsInBounds(hex)) continue;
+
+                // 味方ユニットが占有するセルは表示しない
+                var unit = grid.GetUnit(hex);
+                if (unit != null && unit.IsAlive && unit.Team == allyTeam && targetEnemy)
+                    continue;
+                // support の場合: 敵ユニットのセルを除外
+                if (unit != null && unit.IsAlive && unit.Team != allyTeam && !targetEnemy)
+                    continue;
+
                 result.Add(hex);
             }
             return result;
         }
     }
 }
+

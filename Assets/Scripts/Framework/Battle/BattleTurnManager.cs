@@ -322,9 +322,10 @@ namespace AgentSim.Battle
             }
             else if (Phase == PhasePlayerTarget && SelectedAction != null)
             {
-                // 射程内の全マス（ユニット在不在問わず）
+                // 射程内の全マス（味方ユニット占有セルを除外）
                 var rangeHexes = BattleMovement.GetActionRangeHexes(
-                    ActiveUnit.Position, SelectedAction.range, _grid);
+                    ActiveUnit.Position, SelectedAction.range, _grid,
+                    ActiveUnit.Team, SelectedAction.category);
                 // 実際に攻撃できるマス（ユニット在籍）
                 var validTargets = BattleMovement.GetActionTargets(
                     ActiveUnit.Position, SelectedAction.range,
@@ -356,4 +357,5 @@ namespace AgentSim.Battle
         }
     }
 }
+
 
