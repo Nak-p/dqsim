@@ -1,9 +1,11 @@
 ﻿// Assets/Scripts/Framework/Battle/BattleHighlightRenderer.cs
 // AgentSim — バトルハイライト描画
 //
-// Tilemap に頼らず SpriteRenderer GameObject を使って配置する。
-// BattleUnitRenderer と同じく hexTilemap.GetCellCenterWorld() でワールド座標を求めるため
-// Grid 設定の差異によるずれが原理的に発生しない。
+// SpriteRenderer GameObject で配置するため Grid 設定差異によるずれが発生しない。
+// 表示レイヤー（sortingOrder）:
+//   3 = 向きアーク（前方3方向の薄い青）
+//   4 = 移動範囲（前方=緑、後方=黄緑）
+//   5 = アクティブユニット位置（黄）/ 攻撃対象（赤）
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,17 +16,15 @@ namespace AgentSim.Battle
 {
     public static class BattleHighlightRenderer
     {
-        // ── 内部状態 ──────────────────────────────────────────────────
         private static readonly List<GameObject> _pool = new List<GameObject>();
         private static Transform _parent;
 
         private const int TexSize = 64;
 
-        // ── 初期化 ────────────────────────────────────────────────────
-        /// <summary>ハイライト GameObject の親を設定する（BattleTurnManager から呼ぶ）。</summary>
         public static void SetParent(Transform parent) => _parent = parent;
 
         // ── 公開 API ──────────────────────────────────────────────────
+
         public static void Clear()
         {
             foreach (var go in _pool)
@@ -32,17 +32,43 @@ namespace AgentSim.Battle
             _pool.Clear();
         }
 
+        /// <summary>
+        /// 移動範囲ハイライト。
+        /// frontReach = 前方移動のみで到達可能（緑）。
+        /// rearReach  = 後方移動が必要な追加マス（黄緑）。
+        /// 向きアーク（薄い青）で現在の前方3方向を示す。
+        /// </summary>
         public static void ShowMoveRange(
-            HashSet<HexCoord> reachable, HexCoord activeHex, Tilemap hexTilemap)
+            HashSet<HexCoord> frontReach, HashSet<HexCoord> rearReach,
+            HexCoord activeHex, int facing, Tilemap hexTilemap)
         {
             Clear();
             var visual = SettingsRegistry.Current?.BattleVisual;
-            var moveColor   = GetColor(visual?.highlight_move_color,   new Color(0.2f, 0.7f, 0.3f, 0.55f));
-            var activeColor = GetColor(visual?.highlight_active_color, new Color(0.9f, 0.85f, 0.2f, 0.65f));
 
-            foreach (var hex in reachable)
-                Spawn(hex, moveColor, hexTilemap);
-            Spawn(activeHex, activeColor, hexTilemap);
+            var moveColor   = GetColor(visual?.highlight_move_color,      new Color(0.2f, 0.7f, 0.3f, 0.55f));
+            var rearColor   = GetColor(visual?.highlight_rear_move_color,  new Color(0.7f, 0.85f, 0.1f, 0.55f));
+            var activeColor = GetColor(visual?.highlight_active_color,     new Color(0.9f, 0.85f, 0.2f, 0.65f));
+            var facingColor = GetColor(visual?.highlight_facing_color,     new Color(0.4f, 0.8f, 1.0f, 0.18f));
+
+            // 向きアーク: 前方3方向の隣接マス（sortingOrder 3 = 最下層）
+            var dirs = HexCoord.AllDirections;
+            for (int i = -1; i <= 1; i++)
+            {
+                int d  = ((facing + i) % 6 + 6) % 6;
+                var nb = new HexCoord(activeHex.Q + dirs[d].Q, activeHex.R + dirs[d].R);
+                Spawn(nb, facingColor, hexTilemap, 3);
+            }
+
+            // 後方移動マス（sortingOrder 4、向きアークの上）
+            foreach (var hex in rearReach)
+                Spawn(hex, rearColor, hexTilemap, 4);
+
+            // 前方移動マス（rearの上に重ねて前方を優先表示）
+            foreach (var hex in frontReach)
+                Spawn(hex, moveColor, hexTilemap, 4);
+
+            // アクティブユニット位置（最上層）
+            Spawn(activeHex, activeColor, hexTilemap, 5);
         }
 
         public static void ShowActionTargets(
@@ -50,33 +76,33 @@ namespace AgentSim.Battle
         {
             Clear();
             var visual = SettingsRegistry.Current?.BattleVisual;
+
             var attackColor = GetColor(visual?.highlight_attack_color, new Color(0.8f, 0.2f, 0.2f, 0.55f));
             var activeColor = GetColor(visual?.highlight_active_color, new Color(0.9f, 0.85f, 0.2f, 0.65f));
 
             foreach (var hex in targets)
-                Spawn(hex, attackColor, hexTilemap);
-            Spawn(activeHex, activeColor, hexTilemap);
+                Spawn(hex, attackColor, hexTilemap, 4);
+
+            Spawn(activeHex, activeColor, hexTilemap, 5);
         }
 
         // ── 内部ヘルパー ───────────────────────────────────────────────
-        private static void Spawn(HexCoord hex, Color color, Tilemap hexTilemap)
+        private static void Spawn(HexCoord hex, Color color, Tilemap hexTilemap, int sortOrder)
         {
-            // UnitRenderer と同じ座標変換経路でワールド座標を取得
             var cellPos  = BattleTilemapRenderer.HexToTilemapPos(hex);
             var worldPos = hexTilemap.GetCellCenterWorld(cellPos);
             worldPos.z = 0f;
 
-            var go = new GameObject($"Hl_{hex.Q}_{hex.R}");
+            var go = new GameObject($"Hl_{hex.Q}_{hex.R}_{sortOrder}");
             if (_parent != null) go.transform.SetParent(_parent, false);
             go.transform.position = worldPos;
 
-            // タイルセルのサイズに合わせてスケール
             var cellSize = hexTilemap.layoutGrid.cellSize;
             go.transform.localScale = new Vector3(cellSize.x, cellSize.y, 1f);
 
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite       = BuildHexSprite(color);
-            sr.sortingOrder = 5;  // ユニットアイコン(10)の下に表示
+            sr.sortingOrder = sortOrder;
 
             _pool.Add(go);
         }
@@ -97,8 +123,7 @@ namespace AgentSim.Battle
             tex.Apply();
             return Sprite.Create(tex,
                 new Rect(0, 0, TexSize, TexSize),
-                new Vector2(0.5f, 0.5f),
-                TexSize);
+                new Vector2(0.5f, 0.5f), TexSize);
         }
 
         private static Color[] DrawHexTile(int size, Color fill)

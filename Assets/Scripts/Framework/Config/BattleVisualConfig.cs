@@ -22,6 +22,9 @@ namespace AgentSim.Config
         public float[]         enemy_unit_color;        // 敵ユニットアイコン色 RGBA
         public float[]         highlight_move_color;    // 移動可能マスのオーバーレイ色
         public float[]         highlight_attack_color;  // 攻撃対象マスのオーバーレイ色
-        public float[]         highlight_active_color;  // アクティブユニット位置の色
+        public float[]         highlight_active_color;   // アクティブユニット位置の色
+        public float[]         highlight_rear_move_color; // 後方移動マスの色
+        public float[]         highlight_facing_color;    // 向き表示アークの色
     }
 }
+

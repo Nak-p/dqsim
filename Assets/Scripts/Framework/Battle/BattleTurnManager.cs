@@ -171,13 +171,17 @@ namespace AgentSim.Battle
                 return;
             }
 
-            var reachable = BattleMovement.GetReachable(ActiveUnit, _grid);
+            var (frontR, rearR) = BattleMovement.GetReachableSplit(ActiveUnit, _grid);
+            var reachable = new System.Collections.Generic.HashSet<AgentSim.Battle.HexCoord>(frontR);
+            reachable.UnionWith(rearR);
             if (!reachable.Contains(hex)) return;
 
             float apCost = SettingsRegistry.Current.Game.battle_move_ap_cost;
             int steps    = HexCoord.Distance(ActiveUnit.Position, hex);
 
+            int newFacing = BattleMovement.GetDirectionToward(ActiveUnit.Position, hex);
             _grid.MoveUnit(ActiveUnit, hex);
+            ActiveUnit.Facing = newFacing;
             _unitRenderer.MoveUnitSmooth(ActiveUnit, hex);  // アニメーション開始（待機なし）
             ActiveUnit.SpendAp(apCost * steps);
 
@@ -243,9 +247,11 @@ namespace AgentSim.Battle
                 var to       = decision.MoveTarget.Value;
                 int steps    = HexCoord.Distance(enemy.Position, to);
 
+                int enemyNewFacing = BattleMovement.GetDirectionToward(enemy.Position, to);
                 _grid.MoveUnit(enemy, to);
+                enemy.Facing = enemyNewFacing;
                 var moveAnim = _unitRenderer.MoveUnitSmooth(enemy, to);
-                if (moveAnim != null) yield return moveAnim;  // アニメーション完了まで待機
+                if (moveAnim != null) yield return moveAnim;
                 enemy.SpendAp(apCost * steps);
 
                 OnStateChanged?.Invoke();
@@ -271,9 +277,9 @@ namespace AgentSim.Battle
 
             if (Phase == PhasePlayerMove)
             {
-                var reachable = BattleMovement.GetReachable(ActiveUnit, _grid);
+                var (front, rear) = BattleMovement.GetReachableSplit(ActiveUnit, _grid);
                 BattleHighlightRenderer.ShowMoveRange(
-                    reachable, ActiveUnit.Position, _hexTilemap);
+                    front, rear, ActiveUnit.Position, ActiveUnit.Facing, _hexTilemap);
             }
             else if (Phase == PhasePlayerTarget && SelectedAction != null)
             {
@@ -290,4 +296,5 @@ namespace AgentSim.Battle
         }
     }
 }
+
 

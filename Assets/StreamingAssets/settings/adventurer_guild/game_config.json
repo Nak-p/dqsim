@@ -23,6 +23,8 @@
   "battle_move_ap_cost": 1.0,
   "battle_hp_stat": "endurance",
   "battle_ap_stat": "focus",
-  "battle_ap_initial": 5.0
+  "battle_ap_initial": 5.0,
+  "battle_rear_ap_penalty": 1.0
 }
+
 

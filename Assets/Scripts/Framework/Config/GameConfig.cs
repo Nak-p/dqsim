@@ -46,6 +46,8 @@ namespace AgentSim.Config
         public string battle_hp_stat;           // HPに使う derived stat id
         public string battle_ap_stat;           // APに使う derived stat id
         public float  battle_ap_initial;        // バトル開始時の初期AP（ターンごとにリセット）
+        public float  battle_rear_ap_penalty;   // 後方移動の追加APコスト
     }
 }
+
 

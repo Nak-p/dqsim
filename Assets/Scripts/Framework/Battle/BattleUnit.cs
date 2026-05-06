@@ -30,6 +30,10 @@ namespace AgentSim.Battle
 
         public bool IsAlive => CurrentHp > 0;
 
+        // ── 向き（HexCoord.AllDirections のインデックス 0〜5） ─────────
+        // プレイヤーは敵側（正 R 方向 = index 5）、敵はプレイヤー側（負 R 方向 = index 2）を向く
+        public int Facing { get; set; }
+
         // ── 構築 ──────────────────────────────────────────────────────
         public BattleUnit(Agent agent, BattleTeam team)
         {
@@ -41,8 +45,13 @@ namespace AgentSim.Battle
             var cfg = SettingsRegistry.Current.Game;
             MaxHp     = Stats.GetDerived(cfg.battle_hp_stat);
             CurrentHp = MaxHp;
-            MaxAp     = cfg.battle_ap_initial > 0 ? cfg.battle_ap_initial : Stats.GetDerived(cfg.battle_ap_stat);
+            MaxAp     = cfg.battle_ap_initial > 0
+                ? cfg.battle_ap_initial
+                : Stats.GetDerived(cfg.battle_ap_stat);
             CurrentAp = MaxAp;
+
+            // プレイヤーは正 R 方向（敵陣営へ）= 5、敵は負 R 方向（自陣営へ）= 2
+            Facing = team == BattleTeam.Player ? 5 : 2;
         }
 
         // ── HP 操作 ───────────────────────────────────────────────────
@@ -57,4 +66,3 @@ namespace AgentSim.Battle
         public int GetSpeedStat() => Stats.TotalPower;
     }
 }
-
